@@ -7,8 +7,9 @@ app.include_router(generate.router)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # replace with frontend URL later
+    allow_origins=["http://localhost:3000"],  # Frontend dev server
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
