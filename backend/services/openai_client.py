@@ -24,7 +24,7 @@ def extract_json(text: str) -> dict:
                 pass
         raise ValueError("Model response could not be parsed as JSON.")
 
-def generate_project_helper(job_description: str, role: str) -> ProjectHelperResponse:
+def generate_project_helper(job_description: str, role: str) -> ProjectHelperResponse: # make prompt better down the line possibly try out dspy
     prompt = f"""
 You are a senior software architect mentoring someone applying for the following role: {role}.
 
