@@ -11,9 +11,9 @@ const shortcuts = [
   },
   {
     title: "Job Radar",
-    description: "Curated feeds coming soon. Track hiring bursts, referrals, and stack-specific leads.",
-    href: "#",
-    badge: "Soon",
+    description: "Browse curated listings with salary bands, stack highlights, and direct apply links.",
+    href: "/dashboard/jobs",
+    badge: "Live",
   },
   {
     title: "Interview Lab",

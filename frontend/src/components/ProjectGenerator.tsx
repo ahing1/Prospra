@@ -1,14 +1,34 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import api from "@/lib/axios";
 
-export default function ProjectGenerator() {
-  const [jobDesc, setJobDesc] = useState("");
-  const [role, setRole] = useState("Software Engineer");
+type ProjectGeneratorProps = {
+  defaultJobDescription?: string;
+  defaultRole?: string;
+};
+
+export default function ProjectGenerator({
+  defaultJobDescription = "",
+  defaultRole = "Software Engineer",
+}: ProjectGeneratorProps) {
+  const [jobDesc, setJobDesc] = useState(defaultJobDescription);
+  const [role, setRole] = useState(defaultRole);
   const [project, setProject] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (defaultJobDescription) {
+      setJobDesc(defaultJobDescription);
+    }
+  }, [defaultJobDescription]);
+
+  useEffect(() => {
+    if (defaultRole) {
+      setRole(defaultRole);
+    }
+  }, [defaultRole]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
