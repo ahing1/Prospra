@@ -12,10 +12,10 @@ import {
 
 const navLinks = [
   { href: "/#product", label: "Product" },
-  { href: "/#workflow", label: "Workflow" },
-  { href: "/#community", label: "Community" },
+  { href: "/#copilots", label: "AI Copilots" },
+  { href: "/#proof", label: "Proof" },
   { href: "/#pricing", label: "Pricing" },
-  { href: "/#faq", label: "FAQ" },
+  { href: "/#faqs", label: "FAQs" },
 ];
 
 export default function SiteHeader() {
