@@ -17,9 +17,9 @@ const shortcuts = [
   },
   {
     title: "Interview Lab",
-    description: "Behavioral + technical reps, mock schedules, and mentor notes launching shortly.",
-    href: "#",
-    badge: "Soon",
+    description: "Generate behavioral prompts tied to the JD and rehearse STAR stories with coaching notes.",
+    href: "/dashboard/interview-lab",
+    badge: "New",
   },
 ];
 

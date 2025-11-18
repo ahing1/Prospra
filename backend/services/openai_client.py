@@ -3,6 +3,7 @@ import os
 import json
 import re
 from models.project_helper import ProjectHelperResponse
+from models.behavioral_interview import BehavioralInterviewResponse
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -52,3 +53,47 @@ Return ONLY a valid JSON object with this structure:
     content = response.choices[0].message.content.strip()
     data = extract_json(content)
     return ProjectHelperResponse(**data)
+
+def generate_behavioral_questions(
+    job_description: str,
+    role: str,
+    seniority: str | None = None,
+    focus_areas: list[str] | None = None,
+    num_questions: int = 5,
+) -> BehavioralInterviewResponse:
+    focus_text = ", ".join(focus_areas) if focus_areas else "leadership, collaboration, ownership, adaptability"
+    seniority_text = f"{seniority} " if seniority else ""
+    prompt = f"""
+You are a behavioral interview coach designing targeted prompts for a candidate interviewing for a {seniority_text}{role}.
+
+Job description:
+---
+{job_description}
+---
+
+Create {num_questions} behavioral interview questions tightly aligned to the responsibilities, culture, and focus areas: {focus_text}.
+Return ONLY valid JSON with this shape:
+{{
+  "role": "{role}",
+  "seniority": "{seniority or ''}",
+  "questions": [
+    {{
+      "question": "Write the question",
+      "why_it_matters": "Tie back to the JD's expectations",
+      "coaching_points": ["Tip 1", "Tip 2"],
+      "signals": ["Impact area", "Soft skill"]
+    }}
+  ]
+}}
+Ensure `questions` has exactly {num_questions} entries.
+"""
+
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.65,
+    )
+
+    content = response.choices[0].message.content.strip()
+    data = extract_json(content)
+    return BehavioralInterviewResponse(**data)

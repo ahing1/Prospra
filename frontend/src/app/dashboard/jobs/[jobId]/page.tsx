@@ -55,6 +55,9 @@ export default async function JobDetailPage({ params }: PageProps) {
   const projectStudioHref = jobIdParam
     ? `/dashboard/project-studio?jobId=${encodeURIComponent(jobIdParam)}`
     : "/dashboard/project-studio";
+  const interviewLabHref = jobIdParam
+    ? `/dashboard/interview-lab?jobId=${encodeURIComponent(jobIdParam)}`
+    : "/dashboard/interview-lab";
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-slate-950 text-slate-100">
@@ -150,9 +153,14 @@ export default async function JobDetailPage({ params }: PageProps) {
                 <p className="mt-3">
                   Build a tailored project in Project Studio to mirror this stack and talk track, then reference it in your outreach.
                 </p>
-                <Link href={projectStudioHref} className="mt-4 inline-flex text-sm font-semibold text-slate-900">
-                  Generate a project →
-                </Link>
+                <div className="mt-4 flex flex-col gap-3 text-sm font-semibold text-slate-900">
+                  <Link href={projectStudioHref} className="inline-flex">
+                    Generate a project →
+                  </Link>
+                  <Link href={interviewLabHref} className="inline-flex">
+                    Prep behavioral answers →
+                  </Link>
+                </div>
               </div>
             </div>
           </section>

@@ -345,9 +345,6 @@ function Hero({ stats }: { stats: typeof heroStats }) {
       <div className="mx-auto flex max-w-6xl flex-col gap-14 px-6 pb-20 pt-10 lg:flex-row lg:items-center">
         <div className="w-full space-y-8 lg:w-1/2">
           <header className="flex items-center justify-between text-xs font-semibold uppercase tracking-[0.35em] text-slate-300">
-            <Link href="/" className="rounded-full border border-white/15 px-4 py-1 text-[11px] text-white transition hover:border-white">
-              PROSPRA
-            </Link>
           </header>
           <div className="space-y-6">
             <h1 className="text-4xl font-semibold tracking-tight text-white sm:text-5xl lg:text-6xl">
