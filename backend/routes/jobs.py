@@ -1,3 +1,6 @@
+from enum import Enum
+from typing import List, Optional
+
 from fastapi import APIRouter, HTTPException, Query
 
 from models.jobs import JobDetailResponse, JobSearchResponse
@@ -10,15 +13,49 @@ from services.serpapi_client import (
 router = APIRouter(prefix="/jobs", tags=["jobs"])
 
 
+class EmploymentFilter(str, Enum):
+  full_time = "full_time"
+  internship = "internship"
+
+
+EMPLOYMENT_TYPE_TO_SERP = {
+  EmploymentFilter.full_time: "FULLTIME",
+  EmploymentFilter.internship: "INTERN",
+}
+
+
 @router.get("/search", response_model=JobSearchResponse)
 async def search_jobs(
   q: str = Query("software engineer", description="Job keywords to search"),
   location: str = Query("Remote", description="Location to anchor the search"),
   page: int = Query(1, ge=1, description="Pagination index (1-based)"),
+  employment_type: Optional[EmploymentFilter] = Query(
+    None, description="Filter by employment type (full_time, internship)"
+  ),
+  roles: Optional[List[str]] = Query(
+    None,
+    description="Optional role keywords. Provide multiple 'roles' parameters to OR filter (e.g., roles=frontend&roles=backend)",
+  ),
 ):
   try:
-    jobs = await fetch_jobs_from_serpapi(q, location, page)
-    return JobSearchResponse(query=q, location=location, page=page, jobs=jobs)
+    normalized_roles = [role.strip() for role in (roles or []) if role and role.strip()]
+    serp_employment = EMPLOYMENT_TYPE_TO_SERP.get(employment_type) if employment_type else None
+
+    jobs = await fetch_jobs_from_serpapi(
+      q,
+      location,
+      page,
+      employment_type=serp_employment,
+      role_keywords=normalized_roles or None,
+    )
+    return JobSearchResponse(
+      query=q,
+      location=location,
+      page=page,
+      employment_type=employment_type.value if employment_type else None,
+      role_filters=normalized_roles,
+      jobs=jobs,
+    )
   except SerpAPIError as exc:
     raise HTTPException(status_code=502, detail=f"SerpAPI error: {exc}") from exc
   except ValueError as exc:

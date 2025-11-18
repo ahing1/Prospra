@@ -107,6 +107,9 @@ async def fetch_jobs_from_serpapi(
   page: int,
   uule: Optional[str] = None,
   use_uule: bool = True,
+  *,
+  employment_type: Optional[str] = None,
+  role_keywords: Optional[List[str]] = None,
 ) -> List[JobListing]:
   _ensure_api_key()
   normalized_location = location.strip()
@@ -117,16 +120,22 @@ async def fetch_jobs_from_serpapi(
   next_page_token: Optional[str] = None
   data: Optional[dict] = None
 
+  sanitized_roles = [role.strip() for role in (role_keywords or []) if role and role.strip()]
+  combined_query = " ".join([query, *sanitized_roles]).strip() if sanitized_roles else query
+
   while current_page <= page:
     params = {
       "engine": "google_jobs",
-      "q": query,
+      "q": combined_query,
       "api_key": SERP_API_KEY,
     }
     if use_uule and uule:
       params["uule"] = uule
     elif normalized_location:
       params["location"] = normalized_location
+    if employment_type:
+      params["employment_type"] = employment_type
+
     if next_page_token:
       params["next_page_token"] = next_page_token
 

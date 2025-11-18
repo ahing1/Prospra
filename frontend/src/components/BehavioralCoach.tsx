@@ -162,12 +162,20 @@ export default function BehavioralCoach({
                   type="button"
                   key={area}
                   onClick={() => toggleFocusArea(area)}
-                  className={`rounded-full border px-4 py-2 text-xs font-semibold transition ${
+                  className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-semibold transition ${
                     selected
-                      ? "border-white/70 bg-white/90 text-slate-900 shadow"
+                      ? "border-sky-200 bg-gradient-to-r from-white to-sky-100/80 text-slate-900 shadow shadow-sky-500/30"
                       : "border-white/20 bg-white/5 text-slate-200 hover:border-white/40"
                   }`}
+                  aria-pressed={selected}
                 >
+                  <span
+                    className={`inline-flex h-4 w-4 items-center justify-center rounded-full border ${
+                      selected ? "border-sky-500 bg-sky-500 text-white" : "border-white/20 text-transparent"
+                    }`}
+                  >
+                    ✓
+                  </span>
                   {area}
                 </button>
               );
@@ -224,6 +232,8 @@ export default function BehavioralCoach({
           {loading ? "Generating prompts..." : "Generate behavioral questions"}
         </button>
       </form>
+
+      {loading && <BehavioralCoachLoading role={role} focusAreas={focusAreas} />}
 
       {error && (
         <div className="rounded-2xl border border-rose-500/40 bg-rose-500/10 p-4 text-sm text-rose-100">
@@ -283,6 +293,37 @@ export default function BehavioralCoach({
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function BehavioralCoachLoading({ role, focusAreas }: { role: string; focusAreas: string[] }) {
+  return (
+    <div className="rounded-[32px] border border-white/15 bg-slate-950/60 p-6 text-slate-200 shadow-[0_25px_70px_rgba(56,189,248,0.2)] backdrop-blur">
+      <div className="flex items-center gap-3">
+        <div className="relative h-3 w-3">
+          <span className="absolute inset-0 animate-ping rounded-full bg-sky-400/70" />
+          <span className="relative block h-3 w-3 rounded-full bg-sky-300" />
+        </div>
+        <p className="text-sm font-semibold">Generating prompts for {role}…</p>
+      </div>
+      <p className="mt-2 text-xs uppercase tracking-[0.3em] text-slate-400">
+        Focus: {focusAreas.length ? focusAreas.join(", ") : "default signal mix"}
+      </p>
+      <div className="mt-6 grid gap-4 md:grid-cols-2">
+        {[0, 1].map((idx) => (
+          <div key={idx} className="space-y-3 rounded-3xl border border-white/10 bg-white/5 p-4 shadow-inner">
+            <div className="h-3 w-32 rounded-full bg-white/10" />
+            <div className="h-4 w-full rounded-full bg-white/10" />
+            <div className="h-4 w-3/4 rounded-full bg-white/10" />
+            <div className="flex gap-2">
+              {[0, 1, 2].map((chip) => (
+                <span key={chip} className="h-6 w-16 rounded-full bg-white/5" />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

@@ -34,6 +34,8 @@ class JobSearchResponse(BaseModel):
   query: str
   location: str
   page: int
+  employment_type: Optional[str] = None
+  role_filters: List[str] = Field(default_factory=list)
   jobs: List[JobListing]
 
 

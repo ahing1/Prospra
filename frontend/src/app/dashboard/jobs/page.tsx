@@ -2,14 +2,32 @@ import { auth } from "@clerk/nextjs/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import api from "@/lib/axios";
+import RoleFilterPicker from "@/components/RoleFilterPicker";
 
 import type { JobSearchResponse } from "@/types/jobs";
 
-async function fetchJobs(query: string, location: string, page: number) {
+async function fetchJobs(options: {
+  query: string;
+  location: string;
+  page: number;
+  employmentType?: string | null;
+  roles?: string[];
+}) {
+  const { query, location, page, employmentType, roles } = options;
   try {
-    const { data } = await api.get<JobSearchResponse>('/jobs/search', {
-      params: { q: query, location, page }
-    });
+    const params = new URLSearchParams();
+    params.set("q", query);
+    params.set("location", location);
+    params.set("page", String(page));
+    if (employmentType && employmentType.trim().length > 0) {
+      params.set("employment_type", employmentType);
+    }
+    (roles || [])
+      .map((role) => role.trim())
+      .filter(Boolean)
+      .forEach((role) => params.append("roles", role));
+
+    const { data } = await api.get<JobSearchResponse>(`/jobs/search?${params.toString()}`);
     return data;
   } catch (error) {
     console.error("Error fetching jobs:", error);
@@ -22,6 +40,8 @@ type SearchParams = {
   q?: string;
   location?: string;
   page?: string;
+  employment_type?: string;
+  roles?: string | string[];
 };
 
 export default async function JobsPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
@@ -37,12 +57,25 @@ export default async function JobsPage({ searchParams }: { searchParams: Promise
     ? resolvedParams.location
     : "Remote";
   const page = Number.parseInt(typeof resolvedParams.page === "string" ? resolvedParams.page : "1", 10) || 1;
+  const employmentType = typeof resolvedParams.employment_type === "string" ? resolvedParams.employment_type : undefined;
+  const roleFiltersRaw = Array.isArray(resolvedParams.roles)
+    ? resolvedParams.roles
+    : resolvedParams.roles
+      ? [resolvedParams.roles]
+      : [];
+  const roleFilters = roleFiltersRaw.filter((role) => role.trim().length > 0);
 
   let data: JobSearchResponse | null = null;
   let error: string | null = null;
 
   try {
-    data = await fetchJobs(query, location, page);
+    data = await fetchJobs({
+      query,
+      location,
+      page,
+      employmentType: employmentType || null,
+      roles: roleFilters,
+    });
   } catch (err) {
     error = err instanceof Error ? err.message : "Unable to load job listings.";
   }
@@ -73,7 +106,7 @@ export default async function JobsPage({ searchParams }: { searchParams: Promise
           </div>
         </header>
 
-        <form className="grid gap-4 rounded-3xl border border-white/10 bg-white/5 p-6 text-sm text-slate-300 md:grid-cols-3" method="get">
+        <form className="grid gap-4 rounded-3xl border border-white/10 bg-white/5 p-6 text-sm text-slate-300 md:grid-cols-4" method="get">
           <label className="space-y-2">
             <span className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">Role</span>
             <input
@@ -94,6 +127,22 @@ export default async function JobsPage({ searchParams }: { searchParams: Promise
               className="w-full rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-white/40 focus:outline-none"
             />
           </label>
+          <label className="space-y-2">
+            <span className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">Commitment</span>
+            <select
+              name="employment_type"
+              defaultValue={employmentType ?? ""}
+              className="w-full rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-sm text-white focus:border-white/40 focus:outline-none"
+            >
+              <option value="">All roles</option>
+              <option value="full_time">Full-time</option>
+              <option value="internship">Internship</option>
+            </select>
+          </label>
+          <div className="space-y-2">
+            <span className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">Role filters</span>
+            <RoleFilterPicker initialSelected={roleFilters} />
+          </div>
           <div className="flex items-end">
             <button
               type="submit"
@@ -194,7 +243,7 @@ export default async function JobsPage({ searchParams }: { searchParams: Promise
               <Link
                 href={{
                   pathname: "/dashboard/jobs",
-                  query: { q: query, location, page: page - 1 },
+                  query: { q: query, location, page: page - 1, employment_type: employmentType, roles: roleFilters },
                 }}
                 className={`rounded-full border px-4 py-2 ${showPrev ? "border-white/30 text-white hover:border-white" : "border-white/10 text-slate-500"}`}
                 aria-disabled={!showPrev}
@@ -204,7 +253,7 @@ export default async function JobsPage({ searchParams }: { searchParams: Promise
               <Link
                 href={{
                   pathname: "/dashboard/jobs",
-                  query: { q: query, location, page: page + 1 },
+                  query: { q: query, location, page: page + 1, employment_type: employmentType, roles: roleFilters },
                 }}
                 className="rounded-full border border-white/30 px-4 py-2 text-white hover:border-white"
               >
