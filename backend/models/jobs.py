@@ -14,20 +14,20 @@ class JobHighlight(BaseModel):
 
 
 class JobListing(BaseModel):
-  job_id: Optional[str]
-  htidocid: Optional[str]
-  title: Optional[str]
-  company: Optional[str]
-  location: Optional[str]
-  via: Optional[str]
-  description: Optional[str]
-  posted_at: Optional[str]
-  salary: Optional[str]
+  job_id: Optional[str] = None
+  htidocid: Optional[str] = None
+  title: Optional[str] = None
+  company: Optional[str] = None
+  location: Optional[str] = None
+  via: Optional[str] = None
+  description: Optional[str] = None
+  posted_at: Optional[str] = None
+  salary: Optional[str] = None
   extensions: List[str] = Field(default_factory=list)
   detected_extensions: Dict[str, Any] = Field(default_factory=dict)
   apply_options: List[JobApplyOption] = Field(default_factory=list)
   job_highlights: List[JobHighlight] = Field(default_factory=list)
-  share_link: Optional[str]
+  share_link: Optional[str] = None
 
 
 class JobSearchResponse(BaseModel):

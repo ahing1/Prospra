@@ -36,3 +36,13 @@ export type JobSearchResponse = {
 export type JobDetailResponse = {
   job: JobListing;
 };
+
+export type SavedJob = {
+  job_id: string;
+  saved_at: string;
+  job: JobListing;
+};
+
+export type SavedJobsResponse = {
+  jobs: SavedJob[];
+};

@@ -1,8 +1,11 @@
 from enum import Enum
 from typing import List, Optional
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from db.database import get_db
+from db.repositories.job_search_repository import cache_job_search_result, get_cached_search
 from models.jobs import JobDetailResponse, JobSearchResponse
 from services.serpapi_client import (
   SerpAPIError,
@@ -36,10 +39,22 @@ async def search_jobs(
     None,
     description="Optional role keywords. Provide multiple 'roles' parameters to OR filter (e.g., roles=frontend&roles=backend)",
   ),
+  db: AsyncSession = Depends(get_db),
 ):
   try:
     normalized_roles = [role.strip() for role in (roles or []) if role and role.strip()]
     serp_employment = EMPLOYMENT_TYPE_TO_SERP.get(employment_type) if employment_type else None
+
+    cached_payload = await get_cached_search(
+      db,
+      query=q,
+      location=location,
+      page=page,
+      employment_type=employment_type.value if employment_type else None,
+      roles=normalized_roles or None,
+    )
+    if cached_payload:
+      return JobSearchResponse(**cached_payload)
 
     jobs = await fetch_jobs_from_serpapi(
       q,
@@ -48,7 +63,7 @@ async def search_jobs(
       employment_type=serp_employment,
       role_keywords=normalized_roles or None,
     )
-    return JobSearchResponse(
+    response = JobSearchResponse(
       query=q,
       location=location,
       page=page,
@@ -56,6 +71,16 @@ async def search_jobs(
       role_filters=normalized_roles,
       jobs=jobs,
     )
+    await cache_job_search_result(
+      db,
+      query=q,
+      location=location,
+      page=page,
+      employment_type=employment_type.value if employment_type else None,
+      roles=normalized_roles or None,
+      payload=response.model_dump(),
+    )
+    return response
   except SerpAPIError as exc:
     raise HTTPException(status_code=502, detail=f"SerpAPI error: {exc}") from exc
   except ValueError as exc:

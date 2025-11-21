@@ -3,7 +3,9 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import api from "@/lib/axios";
 
+import SaveJobButton from "@/components/SaveJobButton";
 import type { JobDetailResponse, JobApplyOption } from "@/types/jobs";
+import { getSavedJob } from "@/server/jobs";
 
 export const dynamic = "force-dynamic";
 
@@ -36,8 +38,11 @@ export default async function JobDetailPage({ params }: PageProps) {
   const jobId = decodeURIComponent(jobIdParam);
 
   let data: JobDetailResponse | null = null;
+  let isSaved = false;
   try {
     data = await fetchJob(jobId);
+    const savedRecord = await getSavedJob(userId, jobId);
+    isSaved = Boolean(savedRecord);
   } catch (error) {
     console.error("Failed to load job detail", error);
     throw error;
@@ -74,10 +79,15 @@ export default async function JobDetailPage({ params }: PageProps) {
           </Link>
           <div className="space-y-3">
             <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">{job.company}</p>
-            <h1 className="text-4xl font-semibold text-white">{job.title}</h1>
-            <p className="text-sm text-slate-300">
-              {job.location ?? "Unknown"} · {job.detected_extensions?.schedule ?? job.via ?? job.type ?? ""} · {posted ?? "Fresh"}
-            </p>
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div>
+                <h1 className="text-4xl font-semibold text-white">{job.title}</h1>
+                <p className="text-sm text-slate-300">
+                  {job.location ?? "Unknown"} · {job.detected_extensions?.schedule ?? job.via ?? job.type ?? ""} · {posted ?? "Fresh"}
+                </p>
+              </div>
+              <SaveJobButton job={job} jobId={job.job_id ?? jobId} isSaved={isSaved} />
+            </div>
           </div>
         </header>
 

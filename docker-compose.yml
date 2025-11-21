@@ -1,12 +1,26 @@
 version: '3.8'
 
 services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=prospra
+      - POSTGRES_USER=prospra
+      - POSTGRES_PASSWORD=prospra
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
   frontend:
     build: ./frontend
     ports:
       - "3000:3000"
     environment:
       - NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=...
+    depends_on:
+      - backend
 
   backend:
     build: ./backend
@@ -14,3 +28,12 @@ services:
       - "8000:8000"
     environment:
       - OPENAI_API_KEY=...
+      - SERPAPI_API_KEY=...
+      - DATABASE_URL=postgresql+asyncpg://prospra:prospra@postgres:5432/prospra
+      - DB_POOL_SIZE=5
+      - DB_MAX_OVERFLOW=10
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:

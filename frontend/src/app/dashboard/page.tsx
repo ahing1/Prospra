@@ -21,6 +21,12 @@ const shortcuts = [
     href: "/dashboard/interview-lab",
     badge: "New",
   },
+  {
+    title: "Profile & Saved Jobs",
+    description: "Review your account details, track pinned roles, and jump back into opportunities you’re watching.",
+    href: "/dashboard/profile",
+    badge: "New",
+  },
 ];
 
 const quickStats = [
@@ -66,10 +72,10 @@ export default async function DashboardPage() {
                   Generate a project
                 </Link>
                 <Link
-                  href="/"
+                  href="/dashboard/profile"
                   className="rounded-full border border-white/30 px-5 py-2 text-white transition hover:border-white"
                 >
-                  Back to landing
+                  View profile
                 </Link>
               </div>
             </div>
