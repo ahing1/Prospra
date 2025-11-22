@@ -110,6 +110,7 @@ async def fetch_jobs_from_serpapi(
   *,
   employment_type: Optional[str] = None,
   role_keywords: Optional[List[str]] = None,
+  seniority_keywords: Optional[List[str]] = None,
 ) -> List[JobListing]:
   _ensure_api_key()
   normalized_location = location.strip()
@@ -121,7 +122,9 @@ async def fetch_jobs_from_serpapi(
   data: Optional[dict] = None
 
   sanitized_roles = [role.strip() for role in (role_keywords or []) if role and role.strip()]
-  combined_query = " ".join([query, *sanitized_roles]).strip() if sanitized_roles else query
+  sanitized_seniority = [level.strip() for level in (seniority_keywords or []) if level and level.strip()]
+  modifier_keywords = [*sanitized_roles, *sanitized_seniority]
+  combined_query = " ".join([query, *modifier_keywords]).strip() if modifier_keywords else query
 
   while current_page <= page:
     params = {

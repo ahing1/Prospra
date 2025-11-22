@@ -20,5 +20,6 @@ class JobSearch(Base):
   page: Mapped[int] = mapped_column(Integer, default=1)
   employment_type: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
   role_filters: Mapped[List[str]] = mapped_column(JSONB, default=list)
+  seniority_filters: Mapped[List[str]] = mapped_column(JSONB, default=list)
   response_payload: Mapped[dict[str, Any]] = mapped_column(JSONB)
   created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), index=True)

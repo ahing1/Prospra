@@ -2,6 +2,7 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import DashboardNav from "@/components/DashboardNav";
 import SaveJobButton from "@/components/SaveJobButton";
 import { getSavedJobs } from "@/server/jobs";
 
@@ -25,6 +26,18 @@ export default async function ProfilePage() {
       : user?.createdAt
       ? new Date(user.createdAt).toLocaleDateString()
       : "Unknown";
+  const initials =
+    fullName
+      .split(" ")
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((segment) => segment.charAt(0).toUpperCase())
+      .join("") || "P";
+  const profileStats = [
+    { label: "Email", value: primaryEmail },
+    { label: "Member since", value: joinDate },
+    { label: "Saved roles", value: String(savedJobs.length) },
+  ];
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-slate-950 text-slate-100">
@@ -34,87 +47,62 @@ export default async function ProfilePage() {
         <div className="absolute left-10 bottom-16 h-60 w-60 rounded-full bg-amber-500/15 blur-[130px]" />
       </div>
 
-      <main className="relative mx-auto flex max-w-5xl flex-col gap-10 px-6 py-16">
-        <header className="space-y-4">
-          <Link
-            href="/dashboard"
-            className="text-sm font-semibold text-slate-400 transition hover:text-white"
-          >
-            ← Back to dashboard
-          </Link>
-          <div className="space-y-2">
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-indigo-300">
-              Profile
-            </p>
-            <h1 className="text-4xl font-semibold text-white">Your workspace</h1>
-            <p className="text-slate-300">
-              Review your account details and keep tabs on the roles you've saved while exploring
-              the market.
-            </p>
-          </div>
-        </header>
+      <main className="relative flex w-full flex-col gap-10 px-6 py-16 lg:px-12">
+        <DashboardNav />
 
-        <section className="grid gap-6 lg:grid-cols-3">
-          <div className="rounded-3xl border border-white/10 bg-white/5 p-6 lg:col-span-2">
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">
-              Account
-            </p>
-            <h2 className="mt-2 text-2xl font-semibold text-white">{fullName}</h2>
-            <dl className="mt-4 space-y-3 text-sm text-slate-200">
-              <div className="flex items-center justify-between">
-                <dt className="text-slate-400">Email</dt>
-                <dd className="font-semibold text-white">{primaryEmail}</dd>
+        <section className="rounded-[40px] border border-white/10 bg-gradient-to-br from-slate-950/80 via-slate-900/40 to-slate-950/80 p-8 backdrop-blur">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex items-center gap-4">
+              <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-emerald-400/20 text-3xl font-semibold text-white">
+                {initials}
               </div>
-              <div className="flex items-center justify-between">
-                <dt className="text-slate-400">Member since</dt>
-                <dd className="font-semibold text-white">{joinDate}</dd>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-indigo-300">Profile</p>
+                <h1 className="text-4xl font-semibold text-white">{fullName}</h1>
+                <p className="text-sm text-slate-300">Workspace owner - keep these details current as you explore roles</p>
               </div>
-              <div className="flex items-center justify-between">
-                <dt className="text-slate-400">Saved jobs</dt>
-                <dd className="font-semibold text-white">{savedJobs.length}</dd>
-              </div>
-            </dl>
-          </div>
-          <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">
-              Quick actions
-            </p>
-            <div className="mt-4 space-y-3 text-sm font-semibold text-white">
-              <Link href="/dashboard/jobs" className="block rounded-2xl border border-white/10 px-4 py-3 text-center transition hover:border-white/40">
-                Discover jobs
-              </Link>
-              <Link href="/dashboard/project-studio" className="block rounded-2xl border border-white/10 px-4 py-3 text-center transition hover:border-white/40">
-                Build a project
-              </Link>
-              <Link href="/dashboard/interview-lab" className="block rounded-2xl border border-white/10 px-4 py-3 text-center transition hover:border-white/40">
-                Prep interviews
-              </Link>
             </div>
+            <div className="grid gap-3 text-sm text-white sm:grid-cols-3">
+              {profileStats.map((stat) => (
+                <div key={stat.label} className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                  <p className="text-xs uppercase tracking-[0.3em] text-slate-400">{stat.label}</p>
+                  <p className="mt-2 text-lg font-semibold text-white break-words">{stat.value}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-6 flex flex-wrap gap-3 text-sm font-semibold text-white">
+            <Link href="/dashboard/jobs" className="rounded-full border border-white/20 px-4 py-2 transition hover:border-white">
+              Discover jobs
+            </Link>
+            <Link href="/dashboard/project-studio" className="rounded-full border border-white/20 px-4 py-2 transition hover:border-white">
+              Build a project
+            </Link>
+            <Link href="/dashboard/interview-lab" className="rounded-full border border-white/20 px-4 py-2 transition hover:border-white">
+              Prep interviews
+            </Link>
           </div>
         </section>
 
         <section className="space-y-4 rounded-3xl border border-white/10 bg-white/5 p-6">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">
-                Saved roles
-              </p>
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Saved roles</p>
               <h3 className="text-2xl font-semibold text-white">
                 {savedJobs.length > 0 ? "Pinned opportunities" : "No saved roles yet"}
               </h3>
             </div>
-            {savedJobs.length > 0 && (
-              <p className="text-sm text-slate-300">{savedJobs.length} saved</p>
-            )}
+            {savedJobs.length > 0 && <p className="text-sm text-slate-300">{savedJobs.length} saved</p>}
           </div>
 
           {savedJobs.length === 0 ? (
             <div className="rounded-2xl border border-white/10 bg-slate-900/40 p-6 text-sm text-slate-400">
-              You haven’t saved any roles yet. Browse the{" "}
+              You have not saved any roles yet. Browse the{" "}
               <Link href="/dashboard/jobs" className="text-sky-300 hover:text-sky-200">
                 job radar
               </Link>{" "}
-              and tap “Save job” to pin interesting openings here.
+              and tap "Save job" to pin interesting openings here.
             </div>
           ) : (
             <div className="grid gap-4">
@@ -124,13 +112,11 @@ export default async function ProfilePage() {
                 return (
                   <div
                     key={`${jobId}-${saved.saved_at}`}
-                    className="rounded-2xl border border-white/10 bg-slate-900/40 p-4"
+                    className="rounded-2xl border border-white/10 bg-slate-900/40 p-4 transition hover:border-white/30"
                   >
                     <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                       <div>
-                        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">
-                          {job.company}
-                        </p>
+                        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">{job.company}</p>
                         <Link
                           href={`/dashboard/jobs/${encodeURIComponent(jobId)}`}
                           className="text-xl font-semibold text-white hover:text-emerald-300"
@@ -138,12 +124,9 @@ export default async function ProfilePage() {
                           {job.title}
                         </Link>
                         <p className="text-sm text-slate-400">
-                          {job.location ?? "Unknown location"} ·{" "}
-                          {job.detected_extensions?.schedule ?? job.via ?? "Unknown type"}
+                          {job.location ?? "Unknown location"} - {job.detected_extensions?.schedule ?? job.via ?? "Unknown type"}
                         </p>
-                        <p className="mt-2 text-xs text-slate-500">
-                          Saved on {new Date(saved.saved_at).toLocaleDateString()}
-                        </p>
+                        <p className="mt-2 text-xs text-slate-500">Saved on {new Date(saved.saved_at).toLocaleDateString()}</p>
                       </div>
                       <SaveJobButton job={job} jobId={jobId} isSaved />
                     </div>

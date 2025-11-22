@@ -2,6 +2,7 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 
+import DashboardNav from "@/components/DashboardNav";
 import ProjectGenerator from "@/components/ProjectGenerator";
 import api from "@/lib/axios";
 import type { JobDetailResponse } from "@/types/jobs";
@@ -57,7 +58,8 @@ export default async function ProjectStudioPage({
         <div className="absolute left-8 bottom-0 h-64 w-64 rounded-full bg-emerald-400/15 blur-[140px]" />
       </div>
 
-      <main className="relative mx-auto flex max-w-5xl flex-col gap-8 px-6 py-16">
+      <main className="relative flex w-full flex-col gap-8 px-6 py-16 lg:px-12">
+        <DashboardNav />
         <div className="flex flex-col gap-4">
           <Link href="/dashboard" className="text-sm font-semibold text-slate-400 hover:text-white">
             ← Back to dashboard

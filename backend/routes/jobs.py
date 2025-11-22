@@ -21,16 +21,30 @@ class EmploymentFilter(str, Enum):
   internship = "internship"
 
 
+class SeniorityFilter(str, Enum):
+  entry = "entry"
+  mid = "mid"
+  senior = "senior"
+  lead = "lead"
+
+
 EMPLOYMENT_TYPE_TO_SERP = {
   EmploymentFilter.full_time: "FULLTIME",
   EmploymentFilter.internship: "INTERN",
 }
 
+SENIORITY_TO_KEYWORD = {
+  SeniorityFilter.entry: "entry level",
+  SeniorityFilter.mid: "mid level",
+  SeniorityFilter.senior: "senior level",
+  SeniorityFilter.lead: "lead engineer",
+}
+
 
 @router.get("/search", response_model=JobSearchResponse)
 async def search_jobs(
-  q: str = Query("software engineer", description="Job keywords to search"),
-  location: str = Query("Remote", description="Location to anchor the search"),
+  q: str = Query("", description="Job keywords to search"),
+  location: str = Query("", description="Location to anchor the search"),
   page: int = Query(1, ge=1, description="Pagination index (1-based)"),
   employment_type: Optional[EmploymentFilter] = Query(
     None, description="Filter by employment type (full_time, internship)"
@@ -39,45 +53,60 @@ async def search_jobs(
     None,
     description="Optional role keywords. Provide multiple 'roles' parameters to OR filter (e.g., roles=frontend&roles=backend)",
   ),
+  seniority: Optional[List[SeniorityFilter]] = Query(
+    None,
+    description="Optional seniority filters such as entry, mid, senior, lead.",
+  ),
   db: AsyncSession = Depends(get_db),
 ):
   try:
     normalized_roles = [role.strip() for role in (roles or []) if role and role.strip()]
+    normalized_seniority = [choice.value for choice in (seniority or [])]
     serp_employment = EMPLOYMENT_TYPE_TO_SERP.get(employment_type) if employment_type else None
+    seniority_keywords = [SENIORITY_TO_KEYWORD[choice] for choice in (seniority or []) if choice in SENIORITY_TO_KEYWORD]
+
+    if not q.strip():
+      raise HTTPException(status_code=400, detail="Query must be provided to search jobs.")
+
+    location_value = location.strip() or "United States"
 
     cached_payload = await get_cached_search(
       db,
       query=q,
-      location=location,
+      location=location_value,
       page=page,
       employment_type=employment_type.value if employment_type else None,
       roles=normalized_roles or None,
+      seniority_filters=normalized_seniority or None,
     )
     if cached_payload:
       return JobSearchResponse(**cached_payload)
 
     jobs = await fetch_jobs_from_serpapi(
       q,
-      location,
+      location_value,
       page,
       employment_type=serp_employment,
       role_keywords=normalized_roles or None,
+      seniority_keywords=seniority_keywords or None,
     )
     response = JobSearchResponse(
       query=q,
-      location=location,
+      location=location_value,
       page=page,
       employment_type=employment_type.value if employment_type else None,
       role_filters=normalized_roles,
+      seniority_filters=normalized_seniority,
       jobs=jobs,
     )
     await cache_job_search_result(
       db,
       query=q,
-      location=location,
+      location=location_value,
       page=page,
       employment_type=employment_type.value if employment_type else None,
       roles=normalized_roles or None,
+      seniority_filters=normalized_seniority or None,
       payload=response.model_dump(),
     )
     return response

@@ -30,6 +30,9 @@ export type JobSearchResponse = {
   query: string;
   location: string;
   page: number;
+  employment_type?: string | null;
+  role_filters?: string[];
+  seniority_filters?: string[];
   jobs: JobListing[];
 };
 

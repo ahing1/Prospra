@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 
 import BehavioralCoach from "@/components/BehavioralCoach";
+import DashboardNav from "@/components/DashboardNav";
 import api from "@/lib/axios";
 import type { JobDetailResponse } from "@/types/jobs";
 
@@ -64,7 +65,8 @@ export default async function InterviewLabPage({
         <div className="absolute left-10 bottom-0 h-64 w-64 rounded-full bg-emerald-400/15 blur-[130px]" />
       </div>
 
-      <main className="relative mx-auto flex max-w-5xl flex-col gap-8 px-6 py-16">
+      <main className="relative flex w-full flex-col gap-8 px-6 py-16 lg:px-12">
+        <DashboardNav />
         <div className="flex flex-col gap-4">
           <Link href="/dashboard" className="text-sm font-semibold text-slate-400 transition hover:text-white">
             ← Back to dashboard

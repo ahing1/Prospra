@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import api from "@/lib/axios";
 
+import DashboardNav from "@/components/DashboardNav";
 import SaveJobButton from "@/components/SaveJobButton";
 import type { JobDetailResponse, JobApplyOption } from "@/types/jobs";
 import { getSavedJob } from "@/server/jobs";
@@ -72,7 +73,8 @@ export default async function JobDetailPage({ params }: PageProps) {
         <div className="absolute left-10 bottom-10 h-64 w-64 rounded-full bg-amber-400/20 blur-[140px]" />
       </div>
 
-      <main className="relative mx-auto flex max-w-5xl flex-col gap-10 px-6 py-16">
+      <main className="relative flex w-full flex-col gap-10 px-6 py-16 lg:px-12">
+        <DashboardNav />
         <header className="space-y-4">
           <Link href="/dashboard/jobs" className="text-sm font-semibold text-slate-400 transition hover:text-white">
             ← Back to listings

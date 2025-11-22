@@ -1,12 +1,12 @@
 import os
 from typing import AsyncGenerator
+from urllib.parse import quote_plus
 
 from dotenv import load_dotenv
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker, create_async_engine
 
 load_dotenv()
-
 
 def _get_int(name: str, default: int) -> int:
   try:
@@ -17,7 +17,13 @@ def _get_int(name: str, default: int) -> int:
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:
-  raise RuntimeError("DATABASE_URL must be set to connect to PostgreSQL")
+  db_user = os.getenv("POSTGRESQL_USER", "postgres")
+  db_password = os.getenv("POSTGRESQL_PASSWORD", "password")
+  db_host = os.getenv("POSTGRESQL_HOST", "localhost")
+  db_port = os.getenv("POSTGRESQL_PORT", "5432")
+  db_name = os.getenv("POSTGRESQL_DBNAME", "Prospra")
+  password_section = f":{quote_plus(db_password)}" if db_password else ""
+  DATABASE_URL = f"postgresql+asyncpg://{db_user}{password_section}@{db_host}:{db_port}/{db_name}"
 
 POOL_SIZE = _get_int("DB_POOL_SIZE", 5)
 MAX_OVERFLOW = _get_int("DB_MAX_OVERFLOW", 10)

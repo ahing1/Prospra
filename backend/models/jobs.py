@@ -36,6 +36,7 @@ class JobSearchResponse(BaseModel):
   page: int
   employment_type: Optional[str] = None
   role_filters: List[str] = Field(default_factory=list)
+  seniority_filters: List[str] = Field(default_factory=list)
   jobs: List[JobListing]
 
 

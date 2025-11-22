@@ -3,10 +3,18 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import api from "@/lib/axios";
 
+import DashboardNav from "@/components/DashboardNav";
 import RoleFilterPicker from "@/components/RoleFilterPicker";
 import SaveJobButton from "@/components/SaveJobButton";
 import type { JobSearchResponse, SavedJob } from "@/types/jobs";
 import { getSavedJobs } from "@/server/jobs";
+
+const seniorityOptions = [
+  { value: "entry", label: "Entry" },
+  { value: "mid", label: "Mid" },
+  { value: "senior", label: "Senior" },
+  { value: "lead", label: "Lead" },
+];
 
 async function fetchJobs(options: {
   query: string;
@@ -14,8 +22,9 @@ async function fetchJobs(options: {
   page: number;
   employmentType?: string | null;
   roles?: string[];
+  seniority?: string[];
 }) {
-  const { query, location, page, employmentType, roles } = options;
+  const { query, location, page, employmentType, roles, seniority } = options;
   try {
     const params = new URLSearchParams();
     params.set("q", query);
@@ -28,6 +37,10 @@ async function fetchJobs(options: {
       .map((role) => role.trim())
       .filter(Boolean)
       .forEach((role) => params.append("roles", role));
+    (seniority || [])
+      .map((level) => level.trim())
+      .filter(Boolean)
+      .forEach((level) => params.append("seniority", level));
 
     const { data } = await api.get<JobSearchResponse>(
       `/jobs/search?${params.toString()}`
@@ -46,6 +59,7 @@ type SearchParams = {
   page?: string;
   employment_type?: string;
   roles?: string | string[];
+  seniority?: string | string[];
 };
 
 export default async function JobsPage({
@@ -60,13 +74,12 @@ export default async function JobsPage({
 
   const query =
     typeof resolvedParams.q === "string" && resolvedParams.q.trim().length > 0
-      ? resolvedParams.q
-      : "software engineer";
+      ? resolvedParams.q.trim()
+      : "";
   const location =
-    typeof resolvedParams.location === "string" &&
-    resolvedParams.location.trim().length > 0
-      ? resolvedParams.location
-      : "Remote";
+    typeof resolvedParams.location === "string" && resolvedParams.location.trim().length > 0
+      ? resolvedParams.location.trim()
+      : "";
   const page =
     Number.parseInt(
       typeof resolvedParams.page === "string" ? resolvedParams.page : "1",
@@ -82,28 +95,43 @@ export default async function JobsPage({
     ? [resolvedParams.roles]
     : [];
   const roleFilters = roleFiltersRaw.filter((role) => role.trim().length > 0);
+  const seniorityRaw = Array.isArray(resolvedParams.seniority)
+    ? resolvedParams.seniority
+    : resolvedParams.seniority
+    ? [resolvedParams.seniority]
+    : [];
+  const seniorityFilters = seniorityRaw
+    .map((level) => level.trim().toLowerCase())
+    .filter((level) => seniorityOptions.some((option) => option.value === level));
 
   let data: JobSearchResponse | null = null;
   let error: string | null = null;
 
   let savedJobs: SavedJob[] = [];
 
-  try {
-    data = await fetchJobs({
-      query,
-      location,
-      page,
-      employmentType: employmentType || null,
-      roles: roleFilters,
-    });
+  const hasQuery = query.length > 0;
+
+  if (hasQuery) {
+    try {
+      data = await fetchJobs({
+        query,
+        location: location || "United States",
+        page,
+        employmentType: employmentType || null,
+        roles: roleFilters,
+        seniority: seniorityFilters,
+      });
+      savedJobs = await getSavedJobs(userId);
+    } catch (err) {
+      error = err instanceof Error ? err.message : "Unable to load job listings.";
+    }
+  } else {
     savedJobs = await getSavedJobs(userId);
-  } catch (err) {
-    error = err instanceof Error ? err.message : "Unable to load job listings.";
   }
 
   const jobs = data?.jobs ?? [];
   const showPrev = page > 1;
-  const hasResults = jobs.length > 0;
+  const hasResults = hasQuery && jobs.length > 0;
   const savedJobIds = new Set(savedJobs.map((saved) => saved.job_id));
 
   return (
@@ -114,13 +142,14 @@ export default async function JobsPage({
         <div className="absolute left-6 bottom-16 h-64 w-64 rounded-full bg-emerald-400/15 blur-[130px]" />
       </div>
 
-      <main className="relative mx-auto flex max-w-6xl flex-col gap-10 px-6 py-16">
+      <main className="relative flex w-full flex-col gap-10 px-6 py-16 lg:px-12">
+        <DashboardNav />
         <header className="space-y-4">
           <Link
             href="/dashboard"
             className="text-sm font-semibold text-slate-400 transition hover:text-white"
           >
-            ← Back to dashboard
+            {"<-"} Back to dashboard
           </Link>
           <div className="space-y-4">
             <p className="text-sm font-semibold uppercase tracking-[0.3em] text-amber-300">
@@ -138,7 +167,7 @@ export default async function JobsPage({
         </header>
 
         <form
-          className="grid gap-4 rounded-3xl border border-white/10 bg-white/5 p-6 text-sm text-slate-300 md:grid-cols-4"
+          className="grid gap-4 rounded-3xl border border-white/10 bg-white/5 p-6 text-sm text-slate-300 md:grid-cols-5"
           method="get"
         >
           <label className="space-y-2">
@@ -185,6 +214,33 @@ export default async function JobsPage({
             </span>
             <RoleFilterPicker initialSelected={roleFilters} />
           </div>
+          <div className="space-y-2">
+            <span className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">
+              Seniority
+            </span>
+            <div className="flex flex-wrap gap-2">
+              {seniorityOptions.map((option) => {
+                const checked = seniorityFilters.includes(option.value);
+                return (
+                  <label
+                    key={option.value}
+                    className={`inline-flex cursor-pointer items-center gap-2 rounded-2xl border px-3 py-2 text-xs font-semibold ${
+                      checked ? "border-white text-white" : "border-white/20 text-slate-300"
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      name="seniority"
+                      value={option.value}
+                      defaultChecked={checked}
+                      className="accent-white"
+                    />
+                    {option.label}
+                  </label>
+                );
+              })}
+            </div>
+          </div>
           <div className="flex items-end">
             <button
               type="submit"
@@ -221,7 +277,7 @@ export default async function JobsPage({
                           {savedJob.title}
                         </Link>
                         <p className="text-xs text-slate-400">
-                          {savedJob.location ?? "Unknown"} · {savedJob.detected_extensions?.schedule ?? savedJob.via ?? ""}
+                          {savedJob.location ?? "Unknown"} - {savedJob.detected_extensions?.schedule ?? savedJob.via ?? ""}
                         </p>
                       </div>
                       <SaveJobButton job={savedJob} jobId={jobId} isSaved />
@@ -239,7 +295,13 @@ export default async function JobsPage({
           </div>
         )}
 
-        {!error && !hasResults && (
+        {!hasQuery && (
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-6 text-center text-sm text-slate-300">
+            Enter at least a role keyword to start searching.
+          </div>
+        )}
+
+        {!error && hasQuery && !hasResults && (
           <div className="rounded-3xl border border-white/10 bg-white/5 p-6 text-center text-sm text-slate-300">
             No results yet. Try a different query or location.
           </div>
@@ -288,7 +350,7 @@ export default async function JobsPage({
                         {job.location ||
                           job.detected_extensions?.schedule ||
                           "Unknown"}{" "}
-                        ·{" "}
+                        -{" "}
                         {job.detected_extensions?.work_from_home ??
                           job.via ??
                           ""}
@@ -323,7 +385,7 @@ export default async function JobsPage({
                   ) : null}
                   {href && (
                     <span className="mt-4 inline-flex items-center text-sm font-semibold text-sky-300">
-                      View details →
+                      View details {"->"}
                     </span>
                   )}
                 </>
@@ -362,6 +424,7 @@ export default async function JobsPage({
                     page: page - 1,
                     employment_type: employmentType,
                     roles: roleFilters,
+                    seniority: seniorityFilters,
                   },
                 }}
                 className={`rounded-full border px-4 py-2 ${
@@ -382,6 +445,7 @@ export default async function JobsPage({
                     page: page + 1,
                     employment_type: employmentType,
                     roles: roleFilters,
+                    seniority: seniorityFilters,
                   },
                 }}
                 className="rounded-full border border-white/30 px-4 py-2 text-white hover:border-white"

@@ -4,10 +4,12 @@ services:
   postgres:
     image: postgres:16-alpine
     restart: unless-stopped
+    env_file:
+      - ./backend/.env
     environment:
-      - POSTGRES_DB=prospra
-      - POSTGRES_USER=prospra
-      - POSTGRES_PASSWORD=prospra
+      POSTGRES_DB: ${POSTGRESQL_DBNAME}
+      POSTGRES_USER: ${POSTGRESQL_USER}
+      POSTGRES_PASSWORD: ${POSTGRESQL_PASSWORD}
     ports:
       - "5433:5432"
     volumes:
@@ -17,8 +19,10 @@ services:
     build: ./frontend
     ports:
       - "3000:3000"
+    env_file:
+      - ./frontend/.env
     environment:
-      - NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=...
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
     depends_on:
       - backend
 
@@ -26,12 +30,14 @@ services:
     build: ./backend
     ports:
       - "8000:8000"
+    env_file:
+      - ./backend/.env
     environment:
-      - OPENAI_API_KEY=...
-      - SERPAPI_API_KEY=...
-      - DATABASE_URL=postgresql+asyncpg://prospra:prospra@postgres:5432/prospra
-      - DB_POOL_SIZE=5
-      - DB_MAX_OVERFLOW=10
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      SERPAPI_API_KEY: ${SERPAPI_API_KEY}
+      DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://postgres:password@postgres:5432/Prospra}
+      DB_POOL_SIZE: ${DB_POOL_SIZE}
+      DB_MAX_OVERFLOW: ${DB_MAX_OVERFLOW}
     depends_on:
       - postgres
 
