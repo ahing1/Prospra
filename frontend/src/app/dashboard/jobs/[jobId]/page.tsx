@@ -5,7 +5,7 @@ import api from "@/lib/axios";
 
 import DashboardNav from "@/components/DashboardNav";
 import SaveJobButton from "@/components/SaveJobButton";
-import type { JobDetailResponse, JobApplyOption } from "@/types/jobs";
+import type { JobDetailResponse } from "@/types/jobs";
 import { getSavedJob } from "@/server/jobs";
 
 export const dynamic = "force-dynamic";
@@ -146,20 +146,6 @@ export default async function JobDetailPage({ params }: PageProps) {
             ) : null}
 
             <div className="grid gap-6 lg:grid-cols-2">
-              {applyOptions.length > 1 && (
-                <div>
-                  <h3 className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-500">Apply options</h3>
-                  <ul className="mt-3 space-y-2 text-sm text-slate-700">
-                    {applyOptions.map((option: JobApplyOption) => (
-                      <li key={`${option.title}-${option.link}`} className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2">
-                        <a href={option.link ?? "#"} target="_blank" rel="noreferrer" className="font-semibold text-slate-900">
-                          {option.title || option.link}
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
               <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5 text-sm text-slate-600">
                 <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">How to stand out</p>
                 <p className="mt-3">
