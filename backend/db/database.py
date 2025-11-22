@@ -17,11 +17,11 @@ def _get_int(name: str, default: int) -> int:
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:
-  db_user = os.getenv("POSTGRESQL_USER", "postgres")
-  db_password = os.getenv("POSTGRESQL_PASSWORD", "password")
-  db_host = os.getenv("POSTGRESQL_HOST", "localhost")
-  db_port = os.getenv("POSTGRESQL_PORT", "5432")
-  db_name = os.getenv("POSTGRESQL_DBNAME", "Prospra")
+  db_user = os.getenv("POSTGRESQL_USER")
+  db_password = os.getenv("POSTGRESQL_PASSWORD")
+  db_host = os.getenv("POSTGRESQL_HOST")
+  db_port = os.getenv("POSTGRESQL_PORT")
+  db_name = os.getenv("POSTGRESQL_DBNAME")
   password_section = f":{quote_plus(db_password)}" if db_password else ""
   DATABASE_URL = f"postgresql+asyncpg://{db_user}{password_section}@{db_host}:{db_port}/{db_name}"
 
