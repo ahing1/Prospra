@@ -1,14 +1,24 @@
-import axios from 'axios';
+import axios from "axios";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL && process.env.NEXT_PUBLIC_API_URL.startsWith('http')
-  ? process.env.NEXT_PUBLIC_API_URL
-  : (process.env.NEXT_PUBLIC_API_URL ? `http://${process.env.NEXT_PUBLIC_API_URL}` : 'http://127.0.0.1:8000');
+const normalizeBaseUrl = (value?: string) => {
+  if (!value) return undefined;
+  return value.startsWith("http") ? value : `http://${value}`;
+};
+
+const resolveBaseUrl = () => {
+  const isServer = typeof window === "undefined";
+  const serverUrl =
+    normalizeBaseUrl(process.env.INTERNAL_API_URL) ??
+    normalizeBaseUrl(process.env.NEXT_PUBLIC_API_URL);
+  const browserUrl = normalizeBaseUrl(process.env.NEXT_PUBLIC_API_URL);
+  return (isServer ? serverUrl : browserUrl) ?? "http://127.0.0.1:8000";
+};
 
 const api = axios.create({
-  baseURL: API_BASE, // Change to your FastAPI URL on deploy
+  baseURL: resolveBaseUrl(),
   headers: {
-    'Content-Type': 'application/json'
-  }
+    "Content-Type": "application/json",
+  },
 });
 
 export default api;

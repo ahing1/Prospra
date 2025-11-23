@@ -20,12 +20,18 @@ export default async function ProfilePage() {
     user?.emailAddresses[0]?.emailAddress ??
     "Unknown";
   const fullName = user?.fullName ?? user?.username ?? "Anonymous";
-  const joinDate =
-    user?.createdAt instanceof Date
-      ? user.createdAt.toLocaleDateString()
-      : user?.createdAt
-      ? new Date(user.createdAt).toLocaleDateString()
-      : "Unknown";
+  const isDateObject = (value: unknown): value is Date => value instanceof Date;
+  const joinDate = (() => {
+    const createdAt = user?.createdAt;
+    if (!createdAt) return "Unknown";
+    if (isDateObject(createdAt)) {
+      return createdAt.toLocaleDateString();
+    }
+    const isSerializableValue = typeof createdAt === "string" || typeof createdAt === "number";
+    if (!isSerializableValue) return "Unknown";
+    const parsed = new Date(createdAt);
+    return Number.isNaN(parsed.getTime()) ? "Unknown" : parsed.toLocaleDateString();
+  })();
   const initials =
     fullName
       .split(" ")
