@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 
 import DashboardNav from "@/components/DashboardNav";
 import SaveJobButton from "@/components/SaveJobButton";
+import UpgradeButton from "@/components/UpgradeButton";
 import { getSavedJobs } from "@/server/jobs";
 
 export default async function ProfilePage() {
@@ -88,6 +89,20 @@ export default async function ProfilePage() {
             <Link href="/dashboard/interview-lab" className="rounded-full border border-white/20 px-4 py-2 transition hover:border-white">
               Prep interviews
             </Link>
+          </div>
+        </section>
+
+        <section className="grid gap-6 rounded-3xl border border-emerald-400/20 bg-emerald-400/5 p-6 md:grid-cols-2">
+          <div className="space-y-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-200">Billing</p>
+            <h3 className="text-2xl font-semibold text-white">Unlock unlimited interview prep & project planning</h3>
+            <p className="text-sm text-emerald-100">
+              Go Pro to generate unlimited job briefs, behavioral prompts, and scoped project plans. Choose monthly or
+              lifetime access.
+            </p>
+          </div>
+          <div className="flex flex-col justify-center">
+            <UpgradeButton />
           </div>
         </section>
 

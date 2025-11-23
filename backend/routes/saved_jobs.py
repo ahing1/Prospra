@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, Header, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.database import get_db
@@ -12,12 +12,9 @@ from db.repositories.saved_job_repository import (
 )
 from models.jobs import JobListing
 from models.saved_job import SaveJobRequest, SavedJobItem, SavedJobsResponse
+from routes.dependencies import require_user_id
 
 router = APIRouter(prefix="/jobs/saved", tags=["jobs", "saved"])
-
-
-async def require_user_id(x_user_id: str = Header(..., alias="X-User-Id")) -> str:
-  return x_user_id
 
 
 def _to_item(record) -> SavedJobItem:
