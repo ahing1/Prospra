@@ -150,6 +150,11 @@ export default async function DashboardPage({
             Stripe payment successful — premium access is on the way (temporary confirmation banner).
           </div>
         )}
+        {billingStatus === "upgrade-required" && (
+          <div className="rounded-2xl border border-amber-400/40 bg-amber-400/10 p-4 text-sm text-amber-50">
+            Upgrade required: choose a plan to unlock Pro-only areas.
+          </div>
+        )}
 
         <section className="rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur">
           <div className="space-y-4">
