@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from db.database import dispose_db, init_db
-from routes import behavioral, billing, health, jobs, project_helper, saved_jobs
+from routes import behavioral, billing, health, jobs, project_helper, saved_jobs, pro
 
 
 @asynccontextmanager
@@ -21,6 +21,7 @@ app.include_router(jobs.router)
 app.include_router(behavioral.router)
 app.include_router(saved_jobs.router)
 app.include_router(billing.router)
+app.include_router(pro.router)
 
 app.add_middleware(
     CORSMiddleware,

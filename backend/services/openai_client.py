@@ -2,6 +2,7 @@ from openai import OpenAI
 import os
 import json
 import re
+from models.project_coach import ProjectCoachRequest, ProjectCoachResponse
 from models.project_helper import ProjectHelperResponse
 from models.behavioral_interview import BehavioralInterviewResponse
 from dotenv import load_dotenv
@@ -97,3 +98,55 @@ Ensure `questions` has exactly {num_questions} entries.
     content = response.choices[0].message.content.strip()
     data = extract_json(content)
     return BehavioralInterviewResponse(**data)
+
+
+def _render_stack(tech_stack: list[str]) -> str:
+    cleaned = [item.strip() for item in tech_stack if item and item.strip()]
+    return ", ".join(cleaned) if cleaned else "Not provided"
+
+
+def _build_project_coach_messages(payload: ProjectCoachRequest, user_id: str):
+    stack_text = _render_stack(payload.tech_stack)
+    stage_text = payload.stage.strip() if payload.stage else "Not provided"
+    project_context = f"""Project context for coaching:
+Title: {payload.project_title}
+Goal: {payload.project_summary}
+Stack: {stack_text}
+Current stage: {stage_text}
+User id (for personalization only): {user_id}
+Coaching intent: teach the user how to build this project without handing over full solutions.
+"""
+
+    history = payload.history[-8:]  # keep history short for the model
+    messages = [
+        {
+            "role": "system",
+            "content": (
+                "You are a project mentor who teaches through scaffolding and questions. "
+                "Keep answers concise (under 220 words), avoid writing full code, and focus on outlining approaches, "
+                "trade-offs, checkpoints, and what to try next. "
+                "Prefer hints and partial examples over final answers. Always end with a short question to confirm understanding. "
+                "Respond only in valid JSON with this shape: "
+                '{"message": "...", "next_steps": ["..."], "questions": ["..."]}. '
+                "Ensure `next_steps` are small, sequential actions the user can attempt next, and `questions` are reflective prompts."
+            ),
+        },
+        {"role": "user", "content": project_context},
+    ]
+    for turn in history:
+        role = "assistant" if turn.role == "assistant" else "user"
+        messages.append({"role": role, "content": turn.content})
+    messages.append({"role": "user", "content": payload.user_message})
+    return messages
+
+
+def generate_project_coach_response(payload: ProjectCoachRequest, user_id: str) -> ProjectCoachResponse:
+    messages = _build_project_coach_messages(payload, user_id)
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=messages,
+        temperature=0.55,
+    )
+    content = response.choices[0].message.content.strip()
+    data = extract_json(content)
+    return ProjectCoachResponse(**data)

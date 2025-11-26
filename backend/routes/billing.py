@@ -11,10 +11,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from db.database import get_db
 from db.repositories.user_subscription_repository import (
   get_subscription_by_stripe_id,
-  get_subscription_for_user,
   upsert_user_subscription,
 )
 from routes.dependencies import require_user_id
+from services.entitlements import fetch_user_entitlement
 from services.stripe_client import (
   StripeCheckoutError,
   StripeWebhookError,
@@ -57,18 +57,6 @@ def _timestamp_to_datetime(timestamp: Any) -> datetime | None:
     return None
 
 
-def _is_entitled(status: str | None, expires_at: datetime | None) -> bool:
-  if not status:
-    return False
-  normalized = status.lower()
-  active_states = {"active", "trialing", "paid", "complete", "succeeded"}
-  if normalized not in active_states:
-    return False
-  if not expires_at:
-    return True
-  return expires_at > datetime.now(timezone.utc)
-
-
 @router.post("/checkout", status_code=status.HTTP_201_CREATED)
 async def start_checkout_session(
   payload: CheckoutRequest,
@@ -86,17 +74,13 @@ async def billing_status(
   user_id: str = Depends(require_user_id),
   db: AsyncSession = Depends(get_db),
 ):
-  record = await get_subscription_for_user(db, user_id)
-  if not record:
-    return BillingStatusResponse(status=None, plan=None, entitled=False, entitlement_expires_at=None, last_event_id=None)
-
-  entitled = _is_entitled(record.status, record.entitlement_expires_at)
+  entitlement = await fetch_user_entitlement(db, user_id)
   return BillingStatusResponse(
-    status=record.status,
-    plan=record.plan,
-    entitled=entitled,
-    entitlement_expires_at=record.entitlement_expires_at,
-    last_event_id=record.last_event_id,
+    status=entitlement.status,
+    plan=entitlement.plan,
+    entitled=entitlement.entitled,
+    entitlement_expires_at=entitlement.entitlement_expires_at,
+    last_event_id=entitlement.last_event_id,
   )
 
 
