@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import ProjectCoach from "@/components/ProjectCoach";
+import BehavioralInterviewAssistant from "@/components/BehavioralInterviewAssistant";
 
 type ProTool = "project" | "behavioral";
 
@@ -23,33 +24,14 @@ const toolCards: Array<{
   {
     id: "behavioral",
     title: "Behavioral assistant",
-    summary: "Practice behavioral drills tailored to your target role (ships soon).",
-    badge: "Coming soon",
-    status: "coming-soon",
+    summary: "Simulate behavioral interviews with STAR feedback, tailored to your JD.",
+    badge: "Live",
+    status: "live",
   },
 ];
 
 function BehavioralAssistantComingSoon() {
-  return (
-    <div className="rounded-3xl border border-white/10 bg-slate-950/50 p-8 text-slate-100">
-      <div className="space-y-3">
-        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-200">Behavioral assistant</p>
-        <h3 className="text-2xl font-semibold text-white">Conversation coach is almost here</h3>
-        <p className="text-sm text-slate-300">
-          We&apos;re finishing a role-aware interview partner that mirrors onsite-style prompts, scores your response, and
-          recommends follow-up drills. It will land in this workspace soon.
-        </p>
-        <div className="rounded-2xl border border-emerald-200/20 bg-emerald-200/5 p-4 text-sm text-emerald-50">
-          <p>What to expect:</p>
-          <ul className="mt-2 list-disc space-y-1 pl-5">
-            <li>Structured STAR prompts mapped to your job description.</li>
-            <li>Instant coaching notes plus reflection questions.</li>
-            <li>Tracking for strong stories vs. gaps to practice.</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  );
+  return <BehavioralInterviewAssistant />;
 }
 
 export default function ProWorkspace() {

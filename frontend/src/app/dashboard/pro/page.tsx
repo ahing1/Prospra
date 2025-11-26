@@ -31,14 +31,14 @@ export default async function ProPage() {
               <p className="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-200">Pro lab</p>
               <h1 className="text-3xl font-semibold text-white sm:text-4xl">Build with a teaching-first LLM</h1>
               <p className="max-w-2xl text-lg text-slate-200">
-                Your subscription unlocks a project coach tuned to ship interview-ready builds. It guides you with questions,
-                checkpoints, and alternatives instead of handing you code.
+                Your subscription unlocks the project coach and the behavioral interview assistant. Build interview-ready work
+                and rehearse STAR answers with tailored, conversational feedback.
               </p>
               <div className="grid gap-3 sm:grid-cols-3">
                 {[
-                  "Aligned to your stack and stage",
-                  "Pushes questions before answers",
-                  "Keeps you accountable for next steps",
+                  "Project coach aligned to your stack and stage",
+                  "Behavioral assistant tuned to your JD with STAR scoring",
+                  "Pushes questions before answers to keep you accountable",
                 ].map((item) => (
                   <div
                     key={item}

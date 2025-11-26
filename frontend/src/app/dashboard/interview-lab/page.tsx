@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 
 import BehavioralCoach from "@/components/BehavioralCoach";
+import BehavioralInterviewAssistant from "@/components/BehavioralInterviewAssistant";
 import DashboardNav from "@/components/DashboardNav";
 import api from "@/lib/axios";
 import type { JobDetailResponse } from "@/types/jobs";
@@ -69,25 +70,37 @@ export default async function InterviewLabPage({
         <DashboardNav />
         <div className="flex flex-col gap-4">
           <Link href="/dashboard" className="text-sm font-semibold text-slate-400 transition hover:text-white">
-            ← Back to dashboard
+            Back to dashboard
           </Link>
           <div className="space-y-4">
             <p className="text-sm font-semibold uppercase tracking-[0.3em] text-sky-300">Interview Lab</p>
-            <h1 className="text-3xl font-semibold text-white sm:text-4xl">Behavioral prompts, crafted per JD</h1>
+            <h1 className="text-3xl font-semibold text-white sm:text-4xl">
+              Behavioral prompts plus a live assistant
+            </h1>
             <p className="max-w-3xl text-lg text-slate-300">
-              Feed the job description, pick the soft skill focus, and Prospra produces STAR-ready questions with coaching
-              guidance so you sound specific to their team.
+              Feed the job description, pick the soft skill focus, and practice in a real-time interview simulation. Answer via
+              text or audio, then get STAR coverage feedback tailored to the company.
             </p>
             <p className="text-sm text-slate-400">Signed in as {user?.primaryEmailAddress?.emailAddress}</p>
           </div>
         </div>
 
-        <div className="rounded-[32px] border border-white/10 bg-gradient-to-br from-slate-950/70 to-slate-900/40 p-8 shadow-[0_40px_140px_rgba(56,189,248,0.15)] backdrop-blur">
-          <BehavioralCoach
-            defaultJobDescription={defaultJobDescription}
-            defaultRole={defaultRole}
-            defaultSeniority={defaultSeniority}
-          />
+        <div className="space-y-6">
+          <div className="rounded-[32px] border border-white/10 bg-gradient-to-br from-slate-950/70 to-slate-900/40 p-8 shadow-[0_40px_140px_rgba(56,189,248,0.15)] backdrop-blur">
+            <BehavioralInterviewAssistant
+              defaultJobDescription={defaultJobDescription}
+              defaultRole={defaultRole}
+              defaultSeniority={defaultSeniority}
+            />
+          </div>
+
+          <div className="rounded-[32px] border border-white/10 bg-gradient-to-br from-slate-950/70 to-slate-900/40 p-8 shadow-[0_40px_140px_rgba(15,23,42,0.45)] backdrop-blur">
+            <BehavioralCoach
+              defaultJobDescription={defaultJobDescription}
+              defaultRole={defaultRole}
+              defaultSeniority={defaultSeniority}
+            />
+          </div>
         </div>
       </main>
     </div>
