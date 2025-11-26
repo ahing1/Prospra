@@ -90,7 +90,7 @@ export default function BehavioralInterviewAssistant({
     return (
       err?.message ||
       (err?.response?.status === 402
-        ? "This assistant is a Pro feature. Upgrade to continue."
+        ? "This assistant is a Pro feature. Check your plan in Profile."
         : "Something went wrong. Please try again.")
     );
   };

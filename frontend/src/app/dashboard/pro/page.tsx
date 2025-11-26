@@ -23,7 +23,7 @@ export default async function ProPage() {
       </div>
 
       <main className="relative flex w-full flex-col gap-8 px-6 py-16 lg:px-12">
-        <DashboardNav isPro />
+        <DashboardNav />
 
         <section className="rounded-3xl border border-white/10 bg-white/5 p-10 backdrop-blur">
           <div className="grid gap-8 lg:grid-cols-[1.05fr,0.95fr] lg:items-start">

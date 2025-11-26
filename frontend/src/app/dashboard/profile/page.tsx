@@ -5,6 +5,8 @@ import { redirect } from "next/navigation";
 import DashboardNav from "@/components/DashboardNav";
 import SaveJobButton from "@/components/SaveJobButton";
 import UpgradeButton from "@/components/UpgradeButton";
+import SignOutAction from "@/components/SignOutAction";
+import { getBillingStatus } from "@/server/billing";
 import { getSavedJobs } from "@/server/jobs";
 
 export default async function ProfilePage() {
@@ -15,6 +17,12 @@ export default async function ProfilePage() {
 
   const user = await currentUser();
   const savedJobs = await getSavedJobs(userId);
+  const billing = await getBillingStatus(userId);
+  const hasPlan = Boolean(billing?.entitled);
+  const planName = billing?.plan ? billing.plan.replace(/_/g, " ").toUpperCase() : "Free";
+  const expires = billing?.entitlement_expires_at
+    ? new Date(billing.entitlement_expires_at).toLocaleDateString()
+    : null;
 
   const primaryEmail =
     user?.emailAddresses.find((email) => email.id === user.primaryEmailAddressId)?.emailAddress ??
@@ -89,20 +97,32 @@ export default async function ProfilePage() {
             <Link href="/dashboard/interview-lab" className="rounded-full border border-white/20 px-4 py-2 transition hover:border-white">
               Prep interviews
             </Link>
+            <SignOutAction />
           </div>
         </section>
 
         <section className="grid gap-6 rounded-3xl border border-emerald-400/20 bg-emerald-400/5 p-6 md:grid-cols-2">
-          <div className="space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-200">Billing</p>
-            <h3 className="text-2xl font-semibold text-white">Unlock unlimited interview prep & project planning</h3>
+          <div className="space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-200">Plan</p>
+            <h3 className="text-2xl font-semibold text-white">{hasPlan ? "Pro access active" : "You’re on the free plan"}</h3>
             <p className="text-sm text-emerald-100">
-              Go Pro to generate unlimited job briefs, behavioral prompts, and scoped project plans. Choose monthly or
-              lifetime access.
+              Current plan: {planName}
+              {hasPlan && expires ? ` · Renews ${expires}` : ""}
             </p>
+            {!hasPlan && (
+              <p className="text-sm text-emerald-100">
+                Upgrade to enable the Project Coach and Behavioral Assistant. Checkout is a quick redirect.
+              </p>
+            )}
           </div>
           <div className="flex flex-col justify-center">
-            <UpgradeButton />
+            {hasPlan ? (
+              <div className="rounded-2xl border border-emerald-200/30 bg-emerald-200/10 p-4 text-sm text-emerald-50">
+                Your Pro features are ready in Project Studio and Interview Lab.
+              </div>
+            ) : (
+              <UpgradeButton />
+            )}
           </div>
         </section>
 

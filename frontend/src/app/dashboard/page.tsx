@@ -4,15 +4,9 @@ import { redirect } from "next/navigation";
 
 import DashboardNav from "@/components/DashboardNav";
 import SaveJobButton from "@/components/SaveJobButton";
-import UpgradeButton from "@/components/UpgradeButton";
 import api from "@/lib/axios";
 import { getSavedJobs } from "@/server/jobs";
 import type { JobListing, JobSearchResponse, SavedJob } from "@/types/jobs";
-
-type DashboardSearchParams = {
-  [key: string]: string | string[] | undefined;
-  billing?: string | string[];
-};
 
 async function fetchFeaturedJobs(): Promise<JobListing[]> {
   try {
@@ -76,11 +70,7 @@ function JobPreviewCard({ job, isSaved }: { job: JobListing; isSaved: boolean })
   );
 }
 
-export default async function DashboardPage({
-  searchParams,
-}: {
-  searchParams?: Promise<DashboardSearchParams>;
-}) {
+export default async function DashboardPage() {
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
 
@@ -126,14 +116,6 @@ export default async function DashboardPage({
     { label: "Member since", value: joinDate },
   ];
   const jobPreview = jobFeed.slice(0, 6);
-  const resolvedParams: DashboardSearchParams = searchParams ? await searchParams : {};
-  const billingStatus = (() => {
-    const raw = resolvedParams.billing;
-    if (Array.isArray(raw)) {
-      return raw[0]?.toLowerCase();
-    }
-    return raw?.toLowerCase();
-  })();
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-slate-950 text-slate-100">
@@ -145,16 +127,6 @@ export default async function DashboardPage({
 
       <main className="relative flex w-full flex-col gap-8 px-6 py-16 lg:px-12">
         <DashboardNav />
-        {billingStatus === "success" && (
-          <div className="rounded-2xl border border-emerald-400/40 bg-emerald-500/10 p-4 text-sm text-emerald-50">
-            Stripe payment successful — premium access is on the way (temporary confirmation banner).
-          </div>
-        )}
-        {billingStatus === "upgrade-required" && (
-          <div className="rounded-2xl border border-amber-400/40 bg-amber-400/10 p-4 text-sm text-amber-50">
-            Upgrade required: choose a plan to unlock Pro-only areas.
-          </div>
-        )}
 
         <section className="rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur">
           <div className="space-y-4">
@@ -170,21 +142,6 @@ export default async function DashboardPage({
                   <p className="mt-2 text-lg font-semibold text-white">{detail.value}</p>
                 </div>
               ))}
-            </div>
-            <div className="rounded-2xl border border-emerald-400/30 bg-emerald-400/5 p-5">
-              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                <div className="space-y-2">
-                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-200">Billing</p>
-                  <h2 className="text-2xl font-semibold text-white">Upgrade for unlimited prep & project studios</h2>
-                  <p className="text-sm text-emerald-100">
-                    Members get unlimited job radar saves, behavioral drills, and scoped project templates. Pick monthly or
-                    lifetime access.
-                  </p>
-                </div>
-                <div className="w-full max-w-xs">
-                  <UpgradeButton />
-                </div>
-              </div>
             </div>
           </div>
         </section>

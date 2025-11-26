@@ -44,7 +44,7 @@ export default function UpgradeButton() {
       }
       window.location.href = payload.checkout_url;
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Unable to connect to Stripe checkout.";
+      const message = error instanceof Error ? error.message : "Unable to start checkout.";
       setErrorMessage(message);
       setIsLoading(false);
     }
@@ -84,7 +84,7 @@ export default function UpgradeButton() {
           isLoading ? "cursor-not-allowed border-white/20 text-slate-400" : "border-white/40 text-white hover:border-white"
         }`}
       >
-        {isLoading ? "Redirecting to Stripe..." : "Continue to Stripe checkout"}
+        {isLoading ? "Preparing checkout..." : "Continue to checkout"}
       </button>
       {errorMessage && <p className="text-sm text-rose-300">{errorMessage}</p>}
     </div>

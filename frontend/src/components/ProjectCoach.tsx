@@ -13,7 +13,7 @@ type CoachTurn = CoachMessage & {
 const sampleTitle = "Interview prep tracker";
 const sampleSummary =
   "Build a small web app that lets candidates log target companies, store JD snippets, and track outreach status with reminders.";
-const sampleStack = "Next.js, FastAPI, PostgreSQL, Stripe";
+const sampleStack = "Next.js, FastAPI, PostgreSQL";
 const sampleStage = "MVP flow: auth, CRUD for targets, reminders";
 
 const splitStack = (value: string) =>
@@ -200,7 +200,7 @@ export default function ProjectCoach() {
               <p>Share what you are building and ask something specific like:</p>
               <ul className="list-disc space-y-1 pl-5 text-emerald-100">
                 <li>"How should I break the API into milestones without overbuilding?"</li>
-                <li>"What tests prove the Stripe flow is solid before launch?"</li>
+                <li>"What tests prove the payment flow is solid before launch?"</li>
                 <li>"How do I practice explaining this project in interviews?"</li>
               </ul>
             </div>
