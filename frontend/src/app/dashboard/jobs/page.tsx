@@ -106,7 +106,6 @@ export default async function JobsPage({
 
   let data: JobSearchResponse | null = null;
   let error: string | null = null;
-
   let savedJobs: SavedJob[] = [];
 
   const hasQuery = query.length > 0;
@@ -133,6 +132,7 @@ export default async function JobsPage({
   const showPrev = page > 1;
   const hasResults = hasQuery && jobs.length > 0;
   const savedJobIds = new Set(savedJobs.map((saved) => saved.job_id));
+  const isLoading = hasQuery && !error && data === null;
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-slate-950 text-slate-100">
@@ -246,7 +246,7 @@ export default async function JobsPage({
               type="submit"
               className="w-full rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-200"
             >
-              Update results
+              Show jobs
             </button>
           </div>
         </form>
@@ -301,7 +301,14 @@ export default async function JobsPage({
           </div>
         )}
 
-        {!error && hasQuery && !hasResults && (
+        {isLoading && (
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-6 text-center text-sm text-slate-300">
+            <div className="mx-auto mb-3 h-3 w-3 animate-pulse rounded-full bg-amber-300" aria-hidden />
+            Searching the job radar...
+          </div>
+        )}
+
+        {!isLoading && !error && hasQuery && !hasResults && (
           <div className="rounded-3xl border border-white/10 bg-white/5 p-6 text-center text-sm text-slate-300">
             No results yet. Try a different query or location.
           </div>

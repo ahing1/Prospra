@@ -70,9 +70,38 @@ function JobPreviewCard({ job, isSaved }: { job: JobListing; isSaved: boolean })
   );
 }
 
-export default async function DashboardPage() {
+export const dynamic = "force-dynamic";
+
+type DashboardSearchParams = Record<string, string | string[] | undefined>;
+
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<DashboardSearchParams>;
+}) {
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
+
+  const resolvedSearchParams = await searchParams;
+  const billingStatus = typeof resolvedSearchParams?.billing === "string" ? resolvedSearchParams.billing : null;
+  const checkoutSessionId =
+    typeof resolvedSearchParams?.session_id === "string" ? resolvedSearchParams.session_id : null;
+
+  if (billingStatus === "success" && checkoutSessionId) {
+    try {
+      await api.post(
+        "/billing/confirm",
+        { session_id: checkoutSessionId },
+        {
+          headers: {
+            "X-User-Id": userId,
+          },
+        },
+      );
+    } catch (error) {
+      console.error("Failed to confirm checkout session", error);
+    }
+  }
 
   const user = await currentUser();
   const primaryEmail =

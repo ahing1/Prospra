@@ -2,19 +2,25 @@
 
 import { useState } from "react";
 
-import UpgradeButton from "@/components/UpgradeButton";
+import UpgradeButton, { type BillingPlan } from "@/components/UpgradeButton";
 
 type UpgradeModalProps = {
   triggerLabel?: string;
   title?: string;
   description?: string;
+  currentPlan?: BillingPlan | null;
 };
 
 export default function UpgradeModal({
   triggerLabel = "Upgrade to Pro",
   title = "Unlock Pro access",
   description = "Pick a plan to enable the full workspace experience.",
+  currentPlan = null,
 }: UpgradeModalProps) {
+  if (currentPlan === "lifetime") {
+    return null;
+  }
+
   const [open, setOpen] = useState(false);
 
   return (
@@ -44,7 +50,7 @@ export default function UpgradeModal({
               </button>
             </div>
             <div className="mt-6">
-              <UpgradeButton />
+              <UpgradeButton currentPlan={currentPlan} />
             </div>
           </div>
         </div>

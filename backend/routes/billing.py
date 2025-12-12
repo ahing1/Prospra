@@ -20,6 +20,8 @@ from services.stripe_client import (
   StripeWebhookError,
   construct_webhook_event,
   create_checkout_session,
+  fetch_checkout_session,
+  fetch_subscription,
   normalize_plan,
 )
 
@@ -32,6 +34,10 @@ class CheckoutRequest(BaseModel):
   plan: Literal["monthly", "lifetime"] = "monthly"
 
 
+class ConfirmCheckoutRequest(BaseModel):
+  session_id: str
+
+
 class BillingStatusResponse(BaseModel):
   status: str | None
   plan: str | None
@@ -40,12 +46,18 @@ class BillingStatusResponse(BaseModel):
   last_event_id: str | None = None
 
 
-def _get_metadata_value(payload: dict[str, Any], field: str) -> str | None:
-  metadata = payload.get("metadata") or {}
-  try:
-    return metadata.get(field)
-  except AttributeError:
+def _get_metadata_value(payload: Any, field: str) -> str | None:
+  metadata = None
+  if isinstance(payload, dict):
+    metadata = payload.get("metadata")
+  else:
+    metadata = getattr(payload, "metadata", None)
+  if not metadata:
     return None
+  try:
+    return metadata.get(field)  # type: ignore[attr-defined]
+  except AttributeError:
+    return getattr(metadata, field, None)
 
 
 def _timestamp_to_datetime(timestamp: Any) -> datetime | None:
@@ -67,6 +79,56 @@ async def start_checkout_session(
   except StripeCheckoutError as exc:
     raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc)) from exc
   return {"checkout_url": session.url}
+
+
+@router.post("/confirm", response_model=BillingStatusResponse)
+async def confirm_checkout_session(
+  payload: ConfirmCheckoutRequest,
+  user_id: str = Depends(require_user_id),
+  db: AsyncSession = Depends(get_db),
+):
+  try:
+    session = await fetch_checkout_session(payload.session_id)
+  except StripeCheckoutError as exc:
+    raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc)) from exc
+
+  session_user = getattr(session, "client_reference_id", None) or _get_metadata_value(session, "user_id")
+  if session_user and session_user != user_id:
+    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Checkout session does not belong to this user.")
+
+  plan = normalize_plan(_get_metadata_value(session, "plan"))
+  status_value = "active" if getattr(session, "payment_status", None) == "paid" else getattr(session, "status", None)
+  expires_at = None
+  subscription_id = getattr(session, "subscription", None)
+
+  if subscription_id:
+    try:
+      subscription = await fetch_subscription(subscription_id)
+      status_value = subscription.status or status_value
+      expires_at = _timestamp_to_datetime(getattr(subscription, "current_period_end", None))
+    except StripeCheckoutError:
+      logger.warning("Unable to fetch subscription %s for session %s", subscription_id, payload.session_id)
+
+  record = await upsert_user_subscription(
+    db,
+    user_id=user_id,
+    plan=plan,
+    status=status_value,
+    stripe_customer_id=getattr(session, "customer", None),
+    stripe_subscription_id=subscription_id,
+    stripe_checkout_session_id=session.id,
+    stripe_payment_intent_id=getattr(session, "payment_intent", None),
+    entitlement_expires_at=expires_at,
+  )
+
+  entitlement = await fetch_user_entitlement(db, user_id)
+  return BillingStatusResponse(
+    status=entitlement.status,
+    plan=entitlement.plan,
+    entitled=entitlement.entitled,
+    entitlement_expires_at=entitlement.entitlement_expires_at,
+    last_event_id=record.last_event_id,
+  )
 
 
 @router.get("/status", response_model=BillingStatusResponse)

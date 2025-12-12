@@ -90,28 +90,29 @@ export default async function InterviewLabPage({
         </div>
 
         <div className="space-y-6">
-          <div className="rounded-[32px] border border-white/10 bg-gradient-to-br from-slate-950/70 to-slate-900/40 p-8 shadow-[0_40px_140px_rgba(56,189,248,0.15)] backdrop-blur">
-            <BehavioralCoach
-              defaultJobDescription={defaultJobDescription}
-              defaultRole={defaultRole}
-              defaultSeniority={defaultSeniority}
-            />
-          </div>
-
           {!isPro && (
-            <div className="space-y-3 rounded-2xl border border-sky-200/20 bg-sky-200/10 p-6 text-slate-100">
-              <div>
-                <p className="text-sm font-semibold text-white">Unlock the live behavioral assistant</p>
-                <p className="text-sm text-slate-200">
-                  Go Pro to simulate real interviews with audio transcription and STAR feedback tailored to your JD.
-                </p>
+            <>
+              <div className="rounded-[32px] border border-white/10 bg-gradient-to-br from-slate-950/70 to-slate-900/40 p-8 shadow-[0_40px_140px_rgba(56,189,248,0.15)] backdrop-blur">
+                <BehavioralCoach
+                  defaultJobDescription={defaultJobDescription}
+                  defaultRole={defaultRole}
+                  defaultSeniority={defaultSeniority}
+                />
               </div>
-              <UpgradeModal
-                triggerLabel="Upgrade to unlock Behavioral Assistant"
-                title="Unlock the Behavioral Assistant"
-                description="Choose a plan to practice live STAR interviews with feedback."
-              />
-            </div>
+              <div className="space-y-3 rounded-2xl border border-sky-200/20 bg-sky-200/10 p-6 text-slate-100">
+                <div>
+                  <p className="text-sm font-semibold text-white">Unlock the live behavioral assistant</p>
+                  <p className="text-sm text-slate-200">
+                    Go Pro to simulate real interviews with audio transcription and STAR feedback tailored to your JD.
+                  </p>
+                </div>
+                <UpgradeModal
+                  triggerLabel="Upgrade to unlock Behavioral Assistant"
+                  title="Unlock the Behavioral Assistant"
+                  description="Choose a plan to practice live STAR interviews with feedback."
+                />
+              </div>
+            </>
           )}
 
           {isPro && (

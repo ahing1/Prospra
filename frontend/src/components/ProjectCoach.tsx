@@ -15,6 +15,8 @@ const sampleSummary =
   "Build a small web app that lets candidates log target companies, store JD snippets, and track outreach status with reminders.";
 const sampleStack = "Next.js, FastAPI, PostgreSQL";
 const sampleStage = "MVP flow: auth, CRUD for targets, reminders";
+const sampleJobDescription =
+  "We are hiring a full-stack engineer to build candidate-facing features in Next.js and FastAPI. You will ship project trackers, outreach workflows, and integrate Stripe for paid subscriptions.";
 
 const splitStack = (value: string) =>
   value
@@ -22,11 +24,17 @@ const splitStack = (value: string) =>
     .map((item) => item.trim())
     .filter(Boolean);
 
-export default function ProjectCoach() {
-  const [title, setTitle] = useState(sampleTitle);
+type ProjectCoachProps = {
+  defaultJobDescription?: string;
+  defaultRole?: string;
+};
+
+export default function ProjectCoach({ defaultJobDescription = "", defaultRole }: ProjectCoachProps) {
+  const [title, setTitle] = useState(defaultRole || sampleTitle);
   const [summary, setSummary] = useState(sampleSummary);
   const [stackInput, setStackInput] = useState(sampleStack);
   const [stage, setStage] = useState(sampleStage);
+  const [jobDescription, setJobDescription] = useState(defaultJobDescription || sampleJobDescription);
   const [prompt, setPrompt] = useState("");
   const [messages, setMessages] = useState<CoachTurn[]>([]);
   const [isSending, setIsSending] = useState(false);
@@ -40,10 +48,11 @@ export default function ProjectCoach() {
   }, [messages]);
 
   const resetSample = () => {
-    setTitle(sampleTitle);
+    setTitle(defaultRole || sampleTitle);
     setSummary(sampleSummary);
     setStackInput(sampleStack);
     setStage(sampleStage);
+    setJobDescription(defaultJobDescription || sampleJobDescription);
   };
 
   const handleSend = async (event: React.FormEvent) => {
@@ -59,14 +68,11 @@ export default function ProjectCoach() {
       setError("Add a project title and summary so the coach has context.");
       return;
     }
-    if (!trimmedPrompt) {
-      setError("Ask a question or describe what you are stuck on.");
-      return;
-    }
+    const initialPrompt = trimmedPrompt || "Outline the first steps to start this project.";
 
     setError(null);
     const history: CoachMessage[] = messages.map(({ role, content }) => ({ role, content }));
-    const userTurn: CoachTurn = { role: "user", content: trimmedPrompt, createdAt: new Date().toISOString() };
+    const userTurn: CoachTurn = { role: "user", content: initialPrompt, createdAt: new Date().toISOString() };
     setMessages((prev) => [...prev, userTurn]);
     setIsSending(true);
 
@@ -75,7 +81,7 @@ export default function ProjectCoach() {
       project_summary: trimmedSummary,
       tech_stack: splitStack(stackInput),
       stage: trimmedStage || null,
-      user_message: trimmedPrompt,
+      user_message: initialPrompt,
       history,
     };
 
@@ -117,13 +123,6 @@ export default function ProjectCoach() {
               Give the coach enough detail to teach patterns, not hand you code. Stack and stage help steer the guidance.
             </p>
           </div>
-          <button
-            type="button"
-            onClick={resetSample}
-            className="rounded-full border border-white/20 px-4 py-2 text-xs font-semibold text-white transition hover:border-white/50"
-          >
-            Load sample
-          </button>
         </div>
 
         <div className="space-y-3">
@@ -167,6 +166,17 @@ export default function ProjectCoach() {
                 className="w-full rounded-2xl border border-white/10 bg-slate-950/60 p-3 text-sm text-white placeholder:text-slate-500 focus:border-white/40 focus:outline-none"
               />
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-semibold text-slate-100">Job description</label>
+            <textarea
+              value={jobDescription}
+              onChange={(e) => setJobDescription(e.target.value)}
+              rows={4}
+              placeholder="Paste the relevant parts of the JD so the coach can tailor first steps."
+              className="w-full rounded-2xl border border-white/10 bg-slate-950/60 p-3 text-sm text-white placeholder:text-slate-500 focus:border-white/40 focus:outline-none"
+            />
           </div>
         </div>
       </section>
@@ -258,6 +268,12 @@ export default function ProjectCoach() {
                 </div>
               );
             })
+          )}
+          {isSending && (
+            <div className="flex items-center justify-start gap-2 rounded-2xl border border-emerald-200/40 bg-emerald-200/10 px-4 py-2 text-sm text-emerald-50">
+              <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-300" aria-hidden />
+              <span>Coach is thinking...</span>
+            </div>
           )}
         </div>
 

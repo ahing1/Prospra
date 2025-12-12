@@ -109,3 +109,29 @@ def construct_webhook_event(payload: bytes, signature_header: str) -> stripe.Eve
     raise StripeWebhookError("Invalid Stripe webhook payload.") from exc
   except stripe.error.SignatureVerificationError as exc:  # type: ignore[attr-defined]
     raise StripeWebhookError("Invalid Stripe webhook signature.") from exc
+
+
+async def fetch_checkout_session(session_id: str) -> stripe.checkout.Session:
+  """Retrieve a Checkout session directly from Stripe."""
+  def _fetch() -> stripe.checkout.Session:
+    client = get_stripe_client()
+    return client.checkout.Session.retrieve(session_id)
+
+  try:
+    return await asyncio.to_thread(_fetch)
+  except stripe.error.StripeError as exc:  # type: ignore[attr-defined]
+    user_message = getattr(exc, "user_message", None) or "Unable to load Stripe checkout session."
+    raise StripeCheckoutError(user_message) from exc
+
+
+async def fetch_subscription(subscription_id: str) -> stripe.Subscription:
+  """Retrieve a subscription for additional metadata (e.g., expiration)."""
+  def _fetch() -> stripe.Subscription:
+    client = get_stripe_client()
+    return client.Subscription.retrieve(subscription_id)
+
+  try:
+    return await asyncio.to_thread(_fetch)
+  except stripe.error.StripeError as exc:  # type: ignore[attr-defined]
+    user_message = getattr(exc, "user_message", None) or "Unable to load Stripe subscription."
+    raise StripeCheckoutError(user_message) from exc

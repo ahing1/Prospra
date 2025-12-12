@@ -27,6 +27,8 @@ async function fetchJob(jobId: string) {
 
 type SearchParams = {
   jobId?: string;
+  description?: string;
+  title?: string;
 };
 
 export default async function ProjectStudioPage({
@@ -42,11 +44,19 @@ export default async function ProjectStudioPage({
   const isPro = Boolean(billing?.entitled);
   const resolvedParams = await searchParams;
   const jobIdParam = typeof resolvedParams?.jobId === "string" ? resolvedParams.jobId : undefined;
+  const descriptionParam = typeof resolvedParams?.description === "string" ? resolvedParams.description : undefined;
+  const titleParam = typeof resolvedParams?.title === "string" ? resolvedParams.title : undefined;
 
   let defaultJobDescription = "";
   let defaultRole = "Software Engineer";
 
-  if (jobIdParam) {
+  if (descriptionParam) {
+    defaultJobDescription = decodeURIComponent(descriptionParam);
+  }
+  if (titleParam) {
+    defaultRole = decodeURIComponent(titleParam);
+  }
+  if (!defaultJobDescription && jobIdParam) {
     const jobDetail = await fetchJob(decodeURIComponent(jobIdParam));
     if (jobDetail?.job) {
       defaultJobDescription = jobDetail.job.description ?? "";
@@ -80,24 +90,25 @@ export default async function ProjectStudioPage({
         </div>
 
         <div className="space-y-6">
-          <div className="rounded-[32px] border border-white/10 bg-white/5 p-8 shadow-[0_40px_120px_rgba(14,165,233,0.2)] backdrop-blur">
-            <ProjectGenerator defaultJobDescription={defaultJobDescription} defaultRole={defaultRole} />
-          </div>
-
           {!isPro && (
-            <div className="space-y-3 rounded-2xl border border-emerald-200/20 bg-emerald-200/10 p-4 text-sm text-emerald-50">
-              <p>Unlock the Pro Project Coach for live coaching and next steps tailored to your stack.</p>
-              <UpgradeModal
-                triggerLabel="Upgrade to unlock Project Coach"
-                title="Unlock the Project Coach"
-                description="Choose a plan to get live coaching, iterative prompts, and accountability."
-              />
-            </div>
+            <>
+              <div className="rounded-[32px] border border-white/10 bg-white/5 p-8 shadow-[0_40px_120px_rgba(14,165,233,0.2)] backdrop-blur">
+                <ProjectGenerator defaultJobDescription={defaultJobDescription} defaultRole={defaultRole} />
+              </div>
+              <div className="space-y-3 rounded-2xl border border-emerald-200/20 bg-emerald-200/10 p-4 text-sm text-emerald-50">
+                <p>Unlock the Pro Project Coach for live coaching and next steps tailored to your stack.</p>
+                <UpgradeModal
+                  triggerLabel="Upgrade to unlock Project Coach"
+                  title="Unlock the Project Coach"
+                  description="Choose a plan to get live coaching, iterative prompts, and accountability."
+                />
+              </div>
+            </>
           )}
 
           {isPro && (
             <div className="rounded-[32px] border border-emerald-200/30 bg-emerald-200/10 p-8 shadow-[0_40px_120px_rgba(16,185,129,0.18)] backdrop-blur">
-              <ProjectCoach />
+              <ProjectCoach defaultJobDescription={defaultJobDescription} defaultRole={defaultRole} />
             </div>
           )}
         </div>

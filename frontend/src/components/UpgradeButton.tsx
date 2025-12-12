@@ -1,8 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
-type BillingPlan = "monthly" | "lifetime";
+export type BillingPlan = "monthly" | "lifetime";
+
+type UpgradeButtonProps = {
+  currentPlan?: BillingPlan | null;
+};
 
 const planOptions: Array<{
   id: BillingPlan;
@@ -24,8 +28,23 @@ const planOptions: Array<{
   },
 ];
 
-export default function UpgradeButton() {
-  const [selectedPlan, setSelectedPlan] = useState<BillingPlan>("monthly");
+export default function UpgradeButton({ currentPlan }: UpgradeButtonProps) {
+  const normalizedCurrentPlan = useMemo<BillingPlan | null>(() => {
+    if (currentPlan === "monthly" || currentPlan === "lifetime") {
+      return currentPlan;
+    }
+    return null;
+  }, [currentPlan]);
+
+  // Lifetime members should not see upgrade options.
+  if (normalizedCurrentPlan === "lifetime") {
+    return null;
+  }
+
+  const availablePlans = planOptions.filter((plan) => plan.id !== normalizedCurrentPlan);
+  const defaultPlan = availablePlans[0]?.id ?? "monthly";
+
+  const [selectedPlan, setSelectedPlan] = useState<BillingPlan>(defaultPlan);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -53,7 +72,7 @@ export default function UpgradeButton() {
   return (
     <div className="space-y-3">
       <div className="grid gap-2">
-        {planOptions.map((plan) => {
+        {availablePlans.map((plan) => {
           const isActive = selectedPlan === plan.id;
           return (
             <button

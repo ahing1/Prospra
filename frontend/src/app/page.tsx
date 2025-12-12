@@ -1,9 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
-
-type BillingCycle = "monthly" | "yearly";
 
 const heroStats = [
   { label: "Live tech postings", value: "2,300+", detail: "Aggregated from boards, referrals, and partner drops." },
@@ -13,57 +10,53 @@ const heroStats = [
 
 const featureTracks = [
   {
-    badge: "Job Graph",
-    title: "See every relevant posting in one feed",
-    summary:
-      "Pull listings from LinkedIn, Wellfound, YC, and private communities. Each card highlights stack, visa policy, compensation, and hiring signal.",
+    badge: "Job Radar",
+    title: "Search and save roles fast",
+    summary: "Browse remote and US tech roles, view key details at a glance, and save the ones you care about to your dashboard.",
   },
   {
-    badge: "Project Forge",
-    title: "Auto-build a project for that exact role",
-    summary:
-      "Paste a job link and instantly get repo scaffolding, architecture notes, and delivery milestones that mirror the posting’s expectations.",
+    badge: "Project Studio",
+    title: "Generate a role-matched project brief",
+    summary: "Paste the JD and get a scoped brief with milestones, stack hints, and talking points you can ship quickly.",
   },
   {
     badge: "Behavioral Coach",
-    title: "Generate stories that speak to the JD",
-    summary:
-      "Prospra analyzes the role and drafts STAR prompts, recruiter outreach scripts, and follow-ups tailored to that team’s focus.",
+    title: "Practice answers for that company",
+    summary: "Draft and refine STAR-style responses that reference the actual role and focus areas.",
   },
   {
-    badge: "Technical Lab",
-    title: "Drill the questions they will actually ask",
-    summary:
-      "Surface data structure, system design, or product-sense questions tied to the company’s domain with graded answers and hints.",
+    badge: "Pro workspace",
+    title: "Live coaching and interview sim",
+    summary: "Upgrade for the Project Coach and live Behavioral Assistant built into your dashboard.",
   },
 ];
 
 const executionPillars = [
   {
     title: "Discover",
-    detail: "Curated tech roles",
+    detail: "Job radar",
     bullets: [
-      "Unified feed with stack, level, visa, and remote filters.",
-      "Save watchers per company or keyword and get notified when new roles hit.",
-      "AI-generated briefing that explains why the team is hiring now.",
+      "Search remote and US tech roles and save the ones you care about.",
+      "Open a posting to see stack, schedule, and source details in one view.",
+      "Keep saved roles organized from the dashboard.",
     ],
   },
   {
     title: "Build",
-    detail: "Job-specific projects",
+    detail: "Project studio",
     bullets: [
-      "One-click scaffolds with tasks tied to acceptance criteria in the JD.",
-      "Suggested repo structure, integrations, and demo narrative.",
-      "Auto-generated brag docs so you capture learnings while building.",
+      "Paste the JD to get a scoped brief with milestones and stack notes.",
+      "Use the brief to guide a portfolio-ready project matched to the role.",
+      "Upgrade to Pro for the Project Coach when you want live guidance.",
     ],
   },
   {
     title: "Prep",
-    detail: "Behavioral + technical",
+    detail: "Interview lab",
     bullets: [
-      "Behavioral decks referencing the company’s values and tech focus.",
-      "Technical drills seeded from the role’s stack, difficulty, and interview style.",
-      "Loop timelines and reminders so you rehearse the right thing each day.",
+      "Practice with role-specific behavioral prompts and coaching points.",
+      "Upgrade to Pro for the live Behavioral Assistant with STAR feedback.",
+      "Keep your notes and practice runs in one place.",
     ],
   },
 ];
@@ -71,27 +64,23 @@ const executionPillars = [
 const journey = [
   {
     label: "01",
-    title: "Pull the posting",
-    detail:
-      "Drop a link or upload the JD. Prospra scrapes role context, team signals, and required competencies automatically.",
+    title: "Find the role",
+    detail: "Search the job radar, open the posting, and save it to your dashboard.",
   },
   {
     label: "02",
-    title: "Spin up the project",
-    detail:
-      "Generate a scoped repo, backlog, and success metrics tailored to that job so you prove the exact skills they ask for.",
+    title: "Generate the brief",
+    detail: "Paste the JD to get a scoped project brief and stack notes tailored to that role.",
   },
   {
     label: "03",
-    title: "Rehearse interviews",
-    detail:
-      "Run behavioral prompts, system design drills, and coding reps that reference the company’s products and architecture.",
+    title: "Prep your stories",
+    detail: "Use Behavioral Coach prompts to draft STAR answers that reference the company and role.",
   },
   {
     label: "04",
-    title: "Ship & apply",
-    detail:
-      "Package the project, attach loop-ready notes, and push a personalized application or recruiter message with one click.",
+    title: "Upgrade for live help",
+    detail: "Go Pro to unlock the Project Coach and live Behavioral Assistant when you want interactive guidance.",
   },
 ];
 
@@ -100,19 +89,19 @@ const testimonials = [
     quote:
       "I stopped guessing. Each job card came with a tailored project brief and interview prompts, so I always knew what to ship next.",
     name: "Lena Q.",
-    role: "iOS Engineer → Staff @ Series C",
+    role: "iOS Engineer -> Staff @ Series C",
   },
   {
     quote:
-      "Behavioral prep keyed off the JD’s values section. I reused the generated stories word-for-word and closed two offers.",
+      "Behavioral prep keyed off the JD's values section. I reused the generated stories word-for-word and closed two offers.",
     name: "Omar P.",
-    role: "Product Designer → Big Tech",
+    role: "Product Designer -> Big Tech",
   },
   {
     quote:
-      "The technical drills mirrored the company’s stack. By the time the onsite hit, I had rehearsed their exact scenarios.",
+      "The technical drills mirrored the company's stack. By the time the onsite hit, I had rehearsed their exact scenarios.",
     name: "Sarah D.",
-    role: "ML Engineer → GovTech",
+    role: "ML Engineer -> GovTech",
   },
 ];
 
@@ -123,29 +112,29 @@ const faqs = [
       "We monitor LinkedIn, Wellfound, YC, niche communities, and partner channels. Each posting is enriched with stack, visa, compensation, and hiring-signal metadata so you can prioritize quickly.",
   },
   {
-    question: "What’s inside a project brief?",
+    question: "What's inside a project brief?",
     answer:
       "Prospra turns the JD into a repo outline, milestones, acceptance criteria, suggested tech choices, and talking points. You also get demo prompts and brag-doc snippets so you document progress as you build.",
   },
   {
     question: "How specific is the interview preparation?",
     answer:
-      "Behavioral prompts cite the company’s values and recent launches, while technical drills mirror the role’s stack (system design, coding, product sense, or analytics). Each session captures notes for follow-ups.",
+      "Behavioral prompts cite the company values and recent launches, while technical drills mirror the role focus you enter (e.g., system design or product sense). Each session captures notes for follow-ups.",
   },
   {
     question: "What does the paid plan unlock?",
     answer:
-      "Pro members get unlimited project generation, AI companions for postings, analytics on interview performance, mentor feedback, and early access to roadmap releases.",
+      "Pro members get the live Project Coach, the live Behavioral Assistant with STAR feedback, audio transcription for interview practice, and unlimited project brief generations.",
   },
   {
     question: "Can I keep everything in one workspace?",
     answer:
-      "Yes. Application tracking, project assets, interview notes, and templates live together. Upload your own docs or sync GitHub links to keep context centralized.",
+      "Yes. Saved roles, project briefs, and interview practice live together. Keep notes and drafts in one place while you prep.",
   },
   {
-    question: "What’s on the roadmap?",
+    question: "What's on the roadmap?",
     answer:
-      "Resume reviewer and skill-gap analysis are currently being built. They will plug into the same workspace so you can tighten materials and study plans without leaving Prospra.",
+      "More job sources in the radar, deeper Behavioral Coach prompts, and extra Pro coaching formats. All will land inside the same workspace.",
   },
 ];
 
@@ -153,92 +142,72 @@ const integrations = ["Linear", "Notion", "Slack", "Figma", "GitHub", "Jira"];
 
 const aiCompanions = [
   {
-    label: "Role Scout",
-    description: "Explains every posting with risk signals, interviewer intel, and suggested outreach copy.",
+    label: "Job Radar",
+    description: "Browse and save roles with quick-glance details on stack, schedule, and source.",
     availability: "Starter + Pro",
   },
   {
-    label: "Project Copilot",
-    description: "Turns the JD into repo scaffolds, test data, and demo steps so you can start building immediately.",
-    availability: "Pro",
+    label: "Project Coach",
+    description: "Pro users get a live coach to turn the brief into steps, questions, and next experiments.",
+    availability: "Pro + Lifetime",
   },
   {
-    label: "Interview Coach",
-    description: "Feeds behavioral story prompts and technical questions tied to that role, then critiques your drafts.",
+    label: "Behavioral Assistant",
+    description: "Pro users can run live behavioral sims with STAR feedback tied to their JD.",
     availability: "Pro + Lifetime",
   },
 ];
 
-const roadmapHighlights = [
-  {
-    title: "Resume Reviewer",
-    detail: "Upload a resume and get line-by-line scoring tied back to the jobs in your pipeline. (Coming soon)",
-  },
-  {
-    title: "Skill Gap Analysis",
-    detail: "Compare your repos, interview notes, and briefs to the role requirements to surface learning plans. (Coming soon)",
-  },
-];
 
 const planFeatures = {
   starter: [
-    "Unified job posting feed",
-    "3 job-specific project briefs / month",
-    "Weekly behavioral prompt packs",
-    "Community accountability sessions",
+    "Job radar with save to dashboard",
+    "Project Studio brief generator",
+    "Behavioral Coach prompts",
   ],
   pro: [
-    "Unlimited job-specific project generator runs",
-    "AI assistant per role (projects + prep + follow-ups)",
-    "Behavioral + technical drill history with analytics",
-    "Mentor office hours & async reviews",
+    "Everything in Starter",
+    "Project Coach (live, role-aware)",
+    "Behavioral Interview Assistant (live with STAR feedback)",
+    "Audio transcription for interview practice",
   ],
   lifetime: [
     "Everything in Pro",
-    "Priority access to resume reviewer (beta) & skill-gap analysis",
-    "VIP build weekends & demo days",
-    "White-glove onboarding + concierge",
+    "One-time purchase, no renewals",
+    "Priority access to new Pro features",
   ],
 };
 
 export default function Home() {
-  const [billingCycle, setBillingCycle] = useState<BillingCycle>("monthly");
-
-  const plans = useMemo(
-    () => [
-      {
-        name: "Starter",
-        price: "$0",
-        cadence: "forever",
-        description: "Perfect for testing the workflow or tracking a lightweight search.",
-        features: planFeatures.starter,
-        cta: "Create free workspace",
-        highlighted: false,
-      },
-      {
-        name: billingCycle === "monthly" ? "Pro — Monthly" : "Pro — Yearly",
-        price: billingCycle === "monthly" ? "$20" : "$13",
-        cadence: billingCycle === "monthly" ? "/mo" : "/mo (billed annually)",
-        description:
-          billingCycle === "monthly"
-            ? "Unlimited briefs, analytics, and mentor reviews with the flexibility to pause anytime."
-            : "Lock in a 33% discount for long-form searches and ongoing portfolio refresh cycles.",
-        features: planFeatures.pro,
-        cta: billingCycle === "monthly" ? "Start monthly plan" : "Switch to yearly",
-        highlighted: true,
-      },
-      {
-        name: "Lifetime",
-        price: "$299",
-        cadence: "once",
-        description: "Own every update, concierge onboarding, and VIP build weekends forever.",
-        features: planFeatures.lifetime,
-        cta: "Own it forever",
-        highlighted: false,
-      },
-    ],
-    [billingCycle],
-  );
+  const plans = [
+    {
+      name: "Starter",
+      price: "$0",
+      cadence: "forever",
+      description: "Job radar, project briefs, and behavioral prompts to start for free.",
+      features: planFeatures.starter,
+      cta: "Create free workspace",
+      highlighted: false,
+    },
+    {
+      name: "Pro - Monthly",
+      price: "$20",
+      cadence: "/mo",
+      description: "Unlock the live Project Coach, live Behavioral Assistant, and unlimited brief generations.",
+      features: planFeatures.pro,
+      cta: "Start monthly plan",
+      highlighted: true,
+    },
+    {
+      name: "Lifetime",
+      price: "$200",
+      cadence: "once",
+      description: "All Pro features forever with a one-time purchase.",
+      features: planFeatures.lifetime,
+      cta: "Own it forever",
+      highlighted: false,
+    },
+  ];
 
   return (
     <div className="bg-slate-950 text-slate-100">
@@ -281,9 +250,8 @@ export default function Home() {
           <SectionHeading
             eyebrow="Plans"
             title="Pick the runway that matches your season."
-            description="Monthly flexibility, yearly discipline, or a forever pass when you want set-and-forget access."
+            description="Monthly flexibility or a forever pass when you want set-and-forget access."
           />
-          <BillingToggle value={billingCycle} onChange={setBillingCycle} />
           <div className="mt-10 grid gap-6 md:grid-cols-3">
             {plans.map((plan) => (
               <PricingCard key={plan.name} {...plan} />
@@ -324,7 +292,7 @@ export default function Home() {
                 href="/dashboard"
                 className="inline-flex items-center justify-center rounded-full border border-white/30 px-8 py-3 text-sm font-semibold text-white transition hover:border-white"
               >
-                Explore demo →
+                Explore demo -&gt;
               </Link>
             </div>
           </div>
@@ -366,7 +334,7 @@ function Hero({ stats }: { stats: typeof heroStats }) {
               href="/dashboard"
               className="inline-flex items-center justify-center rounded-full border border-white/30 px-7 py-3 text-sm font-semibold text-white transition hover:border-white"
             >
-              Watch walkthrough →
+              Watch walkthrough -&gt;
             </Link>
           </div>
           <div className="grid gap-4 rounded-3xl border border-white/10 bg-white/5 p-6 text-sm text-slate-200 sm:grid-cols-3">
@@ -505,40 +473,13 @@ function TestimonialGrid({ items }: { items: typeof testimonials }) {
           key={entry.name}
           className="rounded-3xl border border-white/10 bg-slate-900/60 p-6 transition-all duration-300 hover:-translate-y-1 hover:border-white/30"
         >
-          <blockquote className="text-lg text-white">“{entry.quote}”</blockquote>
+          <blockquote className="text-lg text-white">"{entry.quote}"</blockquote>
           <figcaption className="mt-6 text-sm text-slate-300">
             <p className="font-semibold text-white">{entry.name}</p>
             <p>{entry.role}</p>
           </figcaption>
         </figure>
       ))}
-    </div>
-  );
-}
-
-function BillingToggle({
-  value,
-  onChange,
-}: {
-  value: BillingCycle;
-  onChange: (cycle: BillingCycle) => void;
-}) {
-  return (
-    <div className="mt-8 inline-flex rounded-full border border-white/20 bg-white/5 p-1 text-xs font-semibold text-white">
-      <button
-        type="button"
-        onClick={() => onChange("monthly")}
-        className={`rounded-full px-5 py-2 transition ${value === "monthly" ? "bg-white text-slate-900" : "text-slate-300"}`}
-      >
-        Monthly
-      </button>
-      <button
-        type="button"
-        onClick={() => onChange("yearly")}
-        className={`rounded-full px-5 py-2 transition ${value === "yearly" ? "bg-white text-slate-900" : "text-slate-300"}`}
-      >
-        Yearly (save 33%)
-      </button>
     </div>
   );
 }

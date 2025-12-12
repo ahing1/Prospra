@@ -23,6 +23,22 @@ export default async function ProfilePage() {
   const expires = billing?.entitlement_expires_at
     ? new Date(billing.entitlement_expires_at).toLocaleDateString()
     : null;
+  const normalizedPlan = billing?.plan?.toLowerCase() ?? null;
+  const isMonthlyMember = normalizedPlan === "monthly";
+  const isLifetimeMember = normalizedPlan === "lifetime";
+  const planHeading = isLifetimeMember ? "Lifetime access active" : hasPlan ? "Pro access active" : "You're on the free plan";
+  const planDetail = (() => {
+    if (isLifetimeMember) {
+      return "Current plan: LIFETIME - permanent access, no renewals.";
+    }
+    if (hasPlan && expires) {
+      return `Current plan: ${planName} - Renews ${expires}`;
+    }
+    if (hasPlan) {
+      return `Current plan: ${planName}`;
+    }
+    return "Upgrade to enable the Project Coach and Behavioral Assistant. Checkout is a quick redirect.";
+  })();
 
   const primaryEmail =
     user?.emailAddresses.find((email) => email.id === user.primaryEmailAddressId)?.emailAddress ??
@@ -104,24 +120,28 @@ export default async function ProfilePage() {
         <section className="grid gap-6 rounded-3xl border border-emerald-400/20 bg-emerald-400/5 p-6 md:grid-cols-2">
           <div className="space-y-2">
             <p className="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-200">Plan</p>
-            <h3 className="text-2xl font-semibold text-white">{hasPlan ? "Pro access active" : "You’re on the free plan"}</h3>
-            <p className="text-sm text-emerald-100">
-              Current plan: {planName}
-              {hasPlan && expires ? ` · Renews ${expires}` : ""}
-            </p>
-            {!hasPlan && (
-              <p className="text-sm text-emerald-100">
-                Upgrade to enable the Project Coach and Behavioral Assistant. Checkout is a quick redirect.
-              </p>
-            )}
+            <h3 className="text-2xl font-semibold text-white">{planHeading}</h3>
+            <p className="text-sm text-emerald-100">{planDetail}</p>
           </div>
           <div className="flex flex-col justify-center">
-            {hasPlan ? (
+            {isLifetimeMember && (
+              <div className="rounded-2xl border border-emerald-200/30 bg-emerald-200/10 p-4 text-sm text-emerald-50">
+                Lifetime membership active. You have permanent access to Project Studio and Interview Lab.
+              </div>
+            )}
+            {isMonthlyMember && (
+              <div className="space-y-3">
+                <div className="rounded-2xl border border-emerald-200/30 bg-emerald-200/10 p-4 text-sm text-emerald-50">
+                  Monthly Pro access is active. Upgrade to lifetime to keep everything without renewals.
+                </div>
+                <UpgradeButton currentPlan="monthly" />
+              </div>
+            )}
+            {!hasPlan && <UpgradeButton />}
+            {hasPlan && !isMonthlyMember && !isLifetimeMember && (
               <div className="rounded-2xl border border-emerald-200/30 bg-emerald-200/10 p-4 text-sm text-emerald-50">
                 Your Pro features are ready in Project Studio and Interview Lab.
               </div>
-            ) : (
-              <UpgradeButton />
             )}
           </div>
         </section>
